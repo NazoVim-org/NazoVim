@@ -1,0 +1,88 @@
+name: "🐛 Bug Report / バグ報告"
+description: "Report a bug in the Neovim config / Neovim設定のバグを報告する"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug Report / バグ報告
+        Please fill in as much detail as possible.  
+        できるだけ詳しく記入してください。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description / 概要"
+      description: |
+        What happened? / 何が起きましたか？
+      placeholder: |
+        e.g. nvim crashes on startup when opening a TypeScript file.
+        例: TypeScriptファイルを開くとnvimが起動時にクラッシュする。
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Steps to Reproduce / 再現手順"
+      description: |
+        How to reproduce the bug? / どうすれば再現できますか？
+      placeholder: |
+        1. Run `nvim foo.ts`
+        2. ...
+        3. Error occurs
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Expected Behavior / 期待する動作"
+      placeholder: |
+        e.g. nvim should open the file normally.
+        例: 正常にファイルが開かれるはず。
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "Actual Behavior / 実際の動作"
+      placeholder: |
+        e.g. Error message: "E5108: Error executing lua ..."
+        例: エラーメッセージ: "E5108: ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: error_log
+    attributes:
+      label: "Error Log / エラーログ"
+      description: |
+        Paste the output of `:messages` or stderr log if available.  
+        `:messages` の出力やstderrのログがあれば貼ってください。
+      render: text
+
+  - type: input
+    id: nvim_version
+    attributes:
+      label: "Neovim Version / Neovimバージョン"
+      description: "Output of `nvim --version | head -1`"
+      placeholder: "NVIM v0.10.x"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: "OS / 環境"
+      placeholder: "e.g. Arch Linux x86_64 / macOS aarch64"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Additional Context / その他"
+      description: |
+        Any other information? / その他、補足があれば。

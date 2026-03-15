@@ -1,0 +1,90 @@
+name: "🔌 Plugin Proposal / プラグイン追加提案"
+description: "Propose adding a new plugin / 新しいプラグインの追加を提案する"
+labels: ["plugin"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Plugin Proposal / プラグイン追加提案
+        Suggest a plugin you'd like to see added to this config.  
+        この設定に追加してほしいプラグインを提案してください。
+
+  - type: input
+    id: plugin_name
+    attributes:
+      label: "Plugin Name / プラグイン名"
+      placeholder: "e.g. folke/flash.nvim"
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_url
+    attributes:
+      label: "Repository URL / リポジトリURL"
+      placeholder: "https://github.com/..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: "What does it do? / どんなプラグインですか？"
+      description: |
+        Brief description of the plugin. / プラグインの概要を簡単に説明してください。
+      placeholder: |
+        e.g. Fast cursor jump with label hints, similar to vim-sneak but treesitter-aware.
+        例: ラベルヒント付きの高速カーソルジャンプ。vim-sneakに似ているがtreesitter対応。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: "Why add it? / なぜ追加したいですか？"
+      description: |
+        What problem does it solve in this config? / この設定のどんな問題を解決しますか？
+      placeholder: |
+        e.g. Current flash.nvim doesn't support treesitter-based selection. This replaces it more cleanly.
+        例: 現状のflash.nvimではtreesitterベースの選択ができない。これで綺麗に置き換えられる。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: replaces
+    attributes:
+      label: "Does it replace an existing plugin? / 既存プラグインの置き換えですか？"
+      options:
+        - "No / いいえ（新規追加）"
+        - "Yes / はい（既存プラグインの置き換え）"
+    validations:
+      required: true
+
+  - type: input
+    id: replaces_name
+    attributes:
+      label: "Replaces (if any) / 置き換え対象（あれば）"
+      placeholder: "e.g. vim-sneak"
+
+  - type: textarea
+    id: lazy_spec
+    attributes:
+      label: "Suggested lazy.nvim spec / lazy.nvim設定案（任意）"
+      description: |
+        If you have a config in mind, paste it here. / 設定案があれば貼ってください。
+      render: lua
+      placeholder: |
+        return {
+          "author/plugin.nvim",
+          event = "BufReadPost",
+          opts = {},
+        }
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "Checklist / チェックリスト"
+      options:
+        - label: "I checked that this plugin isn't already included / 既存の設定に含まれていないことを確認した"
+          required: true
+        - label: "The plugin is actively maintained / プラグインが活発にメンテされている"
+          required: true
