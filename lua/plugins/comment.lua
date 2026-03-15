@@ -1,5 +1,2 @@
-return {
-	"numToStr/Comment.nvim",
-	event = "BufReadPost",
-	config = true,
-}
+-- mini.comment を使うため無効化
+return {}

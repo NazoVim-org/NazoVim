@@ -8,17 +8,17 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		lazy = false,
 		dependencies = { "williamboman/mason.nvim" },
-		opts = {
-			ensure_installed = {
-				"html",
-				"lua_ls",
-				"solargraph",
-				"ts_ls",
-				"efm",
-				"clangd",
-				"jdtls",
-			},
-		},
+	opts = {
+		-- mason が管理するもの（自動インストール対象）
+		-- nixd は mason 非対応のため手動インストールが必要（nix 環境では devShell が提供）
+		ensure_installed = {
+			"html",
+			"lua_ls",
+			"solargraph",
+			"efm",
+			"clangd",
+	},
+	},
 	},
 	{
 		"neovim/nvim-lspconfig",
@@ -63,18 +63,7 @@ return {
 			-- ===== Ruby =====
 			vim.lsp.config("solargraph", { capabilities = capabilities })
 
-			-- ===== JavaScript / TypeScript =====
-			vim.lsp.config("ts_ls", {
-				capabilities = capabilities,
-				cmd = { "typescript-language-server", "--stdio" },
-				filetypes = {
-					"javascript",
-					"javascriptreact",
-					"typescript",
-					"typescriptreact",
-				},
-				root_dir = vim.fs.root(0, { "package.json", "tsconfig.json", ".git" }),
-			})
+			-- ts_ls は typescript-tools.nvim が担当するため除外
 
 			-- ===== Nix (mason 非対応のため手動管理) =====
 			vim.lsp.config("nixd", { capabilities = capabilities })
@@ -93,15 +82,16 @@ return {
 			})
 
 			-- ===== 有効化 =====
+			-- ts_ls は typescript-tools.nvim が担当
+			-- jdtls は nvim-java が管理するため除外
+			-- nixd は mason 非対応（nix devShell または手動インストール）
 			vim.lsp.enable({
 				"html",
 				"lua_ls",
 				"solargraph",
 				"efm",
-				"ts_ls",
 				"clangd",
 				"nixd",
-				"jdtls",
 			})
 		end,
 	},
