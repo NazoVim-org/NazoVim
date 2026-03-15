@@ -53,7 +53,7 @@
               fi
               # lazy.nvim のデータディレクトリを事前に作成
               mkdir -p "$DATA_DIR"
-              exec neovim "$@"
+              exec nvim "$@"
             '';
           };
 
