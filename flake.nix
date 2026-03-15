@@ -18,37 +18,33 @@
       perSystem =
         { pkgs, ... }:
         let
-          # このリポジトリ自体を Nix store にコピーするパッケージ
+          # このリポジトリの設定ファイルを Nix store にコピー
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazozokc-nvim-config";
             version = "0.1.0";
             src = ./.;
+            # .git は不要なので除外
             installPhase = ''
               mkdir -p $out
               cp -r . $out/
+              rm -rf $out/.git
             '';
           };
 
-          # lazy.nvim を Nix store に固定（オフライン初回起動用）
-          lazyNvim = pkgs.fetchFromGitHub {
-            owner = "folke";
-            repo = "lazy.nvim";
-            # lazy-lock.json の commit に合わせる
-            rev = "306a05526ada86a7b30af95c5cc81ffba93fef97";
-            # 初回は空文字で nix build して表示される hash を貼る
-            hash = "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
-          };
-
-          # NVIM_APPNAME で隔離して起動する wrapped neovim
-          # nix run github:nazozokc/nazozokc.nvim.config で使える
+          # NVIM_APPNAME で完全隔離して起動する wrapped neovim
+          # nix run github:nazozokc/nazozokc.nvim.config で起動可能
           nvim-nazozokc = pkgs.writeShellApplication {
             name = "nvim";
-            runtimeInputs = [ pkgs.neovim ];
+            runtimeInputs = [
+              pkgs.neovim
+              pkgs.git # lazy.nvim の自己 bootstrap に必要
+            ];
             text = ''
-              export NVIM_APPNAME="nvim-nazozokc"
-              CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/nvim-nazozokc"
-              DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/nvim-nazozokc"
-              LAZY_DIR="$DATA_DIR/lazy/lazy.nvim"
+              APPNAME="nvim-nazozokc"
+              CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
+              DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
+
+              export NVIM_APPNAME="$APPNAME"
 
               # 初回だけ config を展開する
               if [ ! -d "$CONFIG_DIR" ]; then
@@ -58,13 +54,8 @@
                 chmod -R u+w "$CONFIG_DIR"
               fi
 
-              # lazy.nvim が未インストールなら Nix store から持ってくる
-              if [ ! -d "$LAZY_DIR" ]; then
-                echo "[nazozokc.nvim] Bootstrapping lazy.nvim ..."
-                mkdir -p "$(dirname "$LAZY_DIR")"
-                cp -r ${lazyNvim} "$LAZY_DIR"
-                chmod -R u+w "$LAZY_DIR"
-              fi
+              # lazy.nvim はそのまま init.lua の bootstrap に任せる
+              # （$DATA_DIR/lazy/lazy.nvim へ git clone される）
 
               exec neovim "$@"
             '';
@@ -76,7 +67,7 @@
             # nix build → result/bin/nvim
             default = nvim-nazozokc;
 
-            # nix build .#config → config ファイル一式
+            # nix build .#config → 設定ファイル一式
             config = nvimConfig;
           };
 
@@ -86,9 +77,11 @@
           };
 
           # nix develop → LSP / formatter が揃った開発シェル
+          # NVIM_APPNAME も自動でセットされるので nvim を叩くだけで隔離環境に入る
           devShells.default = pkgs.mkShell {
-            buildInputs = with pkgs; [
+            packages = with pkgs; [
               neovim
+              git
 
               # LSP
               lua-language-server
@@ -102,9 +95,22 @@
             ];
 
             shellHook = ''
+              export NVIM_APPNAME="nvim-nazozokc"
+
+              CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/nvim-nazozokc"
+
+              if [ ! -d "$CONFIG_DIR" ]; then
+                echo "[nazozokc.nvim] Initializing config at $CONFIG_DIR ..."
+                mkdir -p "$CONFIG_DIR"
+                cp -r ${nvimConfig}/. "$CONFIG_DIR/"
+                chmod -R u+w "$CONFIG_DIR"
+              fi
+
               echo "nazozokc.nvim devShell"
               echo "  neovim : $(nvim --version | head -1)"
               echo "  lua-ls : $(lua-language-server --version 2>/dev/null || echo 'ok')"
+              echo "  config : $CONFIG_DIR"
+              echo "  NVIM_APPNAME=$NVIM_APPNAME (隔離済み)"
             '';
           };
         };
