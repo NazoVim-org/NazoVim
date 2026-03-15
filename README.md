@@ -1,6 +1,6 @@
 # Neovim Configuration
 
-このディレクトリは [nazozokc/dotfiles](https://github.com/nazozokc/dotfiles) の Neovim 設定です。  
+このディレクトリは nazozokc/nazozokc.nvim.config リポジトリの Neovim 設定です。  
 lazy.nvim をプラグインマネージャーとして使用しています。
 
 ---
@@ -129,7 +129,7 @@ nvim/
 | キー         | 動作                   |
 | ------------ | ---------------------- |
 | `<Leader>t`  | ターミナル             |
-| `<Leader>c`  | dotfiles を Oil で開く |
+| `<Leader>c`  | 設定ディレクトリを Oil で開く |
 | `<Leader>e`  | Trouble (診断一覧)     |
 | `<Leader>so` | SymbolsOutline         |
 | `<Leader>;`  | Dropbar pick           |
@@ -193,11 +193,10 @@ nvim/
 
 ## 使用方法
 
-この設定は dotfiles リポジトリの一部です。
+このリポジトリをクローンし、`~/.config/nvim` にシンボリックリンクを貼って使用します。
 
 ```bash
-cd ~/ghq/github.com/nazozokc/dotfiles
-nix run .#switch
+git clone https://github.com/nazozokc/nazozokc.nvim.config.git ~/.config/nvim
 ```
 
-Home Manager により `~/.config/nvim` にシンボリックリンクが作成されます。
+または、直接このディレクトリを `~/.config/nvim` に配置してください。
