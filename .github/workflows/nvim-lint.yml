@@ -3,10 +3,12 @@ on:
   pull_request:
     paths:
       - "**/*.lua"
+      - "init.lua"
       - ".github/workflows/nvim-lint.yml"
   push:
     paths:
       - "**/*.lua"
+      - "init.lua"
       - ".github/workflows/nvim-lint.yml"
 
 concurrency:
