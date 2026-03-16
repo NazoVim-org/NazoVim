@@ -135,10 +135,6 @@
     "branch": "main",
     "commit": "72527798e75b5e34757491947c2cb853ce21dc0e"
   },
-  "formatter.nvim": {
-    "branch": "master",
-    "commit": "b9d7f853da1197b83b8edb4cc4952f7ad3a42e41"
-  },
   "friendly-snippets": {
     "branch": "main",
     "commit": "6cd7280adead7f586db6fccbd15d2cac7e2188b9"

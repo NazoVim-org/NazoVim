@@ -5,16 +5,14 @@ return {
 		config = function()
 			require("translate").setup({
 				default = {
-					command = "google", -- 使用する翻訳サービス
-					from = "auto", -- 原文言語
-					to = "ja", -- 翻訳先言語
-				},
-				keymaps = {
-					i = "<C-s>", -- 挿入モードで翻訳
-					n = "<Leader>t", -- ノーマルモードで翻訳
-					v = "<Leader>t", -- ビジュアルモードで翻訳
+					command = "google",
+					from = "auto",
+					to = "ja",
 				},
 			})
+
+			vim.keymap.set("n", "<Leader>T", "<cmd>Translate ja<CR>", { desc = "Translate to Japanese" })
+			vim.keymap.set("v", "<Leader>T", "<cmd>Translate ja<CR>", { desc = "Translate to Japanese" })
 		end,
 	},
 }

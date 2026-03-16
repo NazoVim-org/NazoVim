@@ -1,12 +1,12 @@
 return {
 	{
 		"williamboman/mason.nvim",
-		lazy = false,
+		event = "VeryLazy",
 		opts = {},
 	},
 	{
 		"williamboman/mason-lspconfig.nvim",
-		lazy = false,
+		event = "VeryLazy",
 		dependencies = { "williamboman/mason.nvim" },
 	opts = {
 		-- mason が管理するもの（自動インストール対象）
