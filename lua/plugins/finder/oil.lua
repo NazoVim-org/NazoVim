@@ -30,6 +30,9 @@ return {
 				["<C-h>"] = "actions.select_split",
 				["<C-t>"] = "actions.select_tab",
 			},
+			win_options = {
+				signcolumn = "yes:2",
+			},
 		}
 	end,
 
@@ -37,12 +40,10 @@ return {
 		require("oil").setup(opts)
 		require("oil-git-status").setup()
 
-			-- Oil 用 autocmd
 		vim.api.nvim_create_autocmd("FileType", {
 			pattern = "oil",
 			callback = function()
 				vim.b.snacks_main = true
-				vim.wo.signcolumn = "yes:2"
 			end,
 		})
 	end,
