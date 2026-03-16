@@ -8,17 +8,17 @@ return {
 		"williamboman/mason-lspconfig.nvim",
 		event = "VeryLazy",
 		dependencies = { "williamboman/mason.nvim" },
-	opts = {
-		-- mason が管理するもの（自動インストール対象）
-		-- nixd は mason 非対応のため手動インストールが必要（nix 環境では devShell が提供）
-		ensure_installed = {
-			"html",
-			"lua_ls",
-			"solargraph",
-			"efm",
-			"clangd",
-	},
-	},
+		opts = {
+			-- mason が管理するもの（自動インストール対象）
+			-- nixd は mason 非対応のため手動インストールが必要（nix 環境では devShell が提供）
+			ensure_installed = {
+				"html",
+				"lua_ls",
+				"solargraph",
+				"efm",
+				"clangd",
+			},
+		},
 	},
 	{
 		"neovim/nvim-lspconfig",
