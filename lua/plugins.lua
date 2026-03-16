@@ -1,1 +1,19 @@
-return {}
+return {
+  { import = "plugins.ai" },
+  { import = "plugins.completion" },
+  { import = "plugins.dap" },
+  { import = "plugins.denops" },
+  { import = "plugins.editor" },
+  { import = "plugins.finder" },
+  { import = "plugins.git" },
+  { import = "plugins.lang" },
+  { import = "plugins.lsp" },
+  { import = "plugins.misc" },
+  { import = "plugins.test" },
+  { import = "plugins.treesitter" },
+  { import = "plugins.ui" },
+  { import = "plugins.web" },
+  { import = "plugins.persistence" },
+  { import = "plugins.lazydev" },
+  { import = "plugins.nvim-treesitter-textobjects" },
+}
