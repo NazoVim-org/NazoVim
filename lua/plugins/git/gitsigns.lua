@@ -10,7 +10,6 @@ return {
 			changedelete = { text = "▎" },
 		},
 		signcolumn = true,
-		numhl = true, -- 行番号に色つける
 		watch_gitdir = {
 			follow_files = true,
 		},
