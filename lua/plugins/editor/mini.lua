@@ -68,37 +68,4 @@ return {
 			require("mini.jump").setup({ mappings = { repeat_forward = ";", repeat_backward = "," } })
 		end,
 	},
-
-	{
-		"nvim-mini/mini.diff",
-		event = "BufReadPre",
-		config = function()
-			require("mini.diff").setup({
-				source = require("mini.diff").gen_source.git(),
-
-				view = {
-					style = "sign", -- VSCodeはこれに近い
-					signs = {
-						add = "▎",
-						change = "▎",
-						delete = "",
-					},
-				},
-
-				delay = {
-					text_change = 150,
-				},
-
-				mappings = {
-					goto_prev = "[c",
-					goto_next = "]c",
-				},
-			})
-
-			-- overlayはVSCode風なら基本使わない
-			vim.keymap.set("n", "<leader>do", function()
-				require("mini.diff").toggle_overlay()
-			end, { desc = "Toggle diff overlay" })
-		end,
-	},
 }
