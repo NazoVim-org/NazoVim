@@ -113,7 +113,7 @@ return {
 		local ns = vim.api.nvim_create_namespace("cmp_snippet_preview")
 
 		vim.api.nvim_create_autocmd("CompleteChanged", {
-			callback = function(event)
+			callback = function()
 				local ok, err = pcall(function()
 					vim.api.nvim_buf_clear_namespace(0, ns, 0, -1)
 
