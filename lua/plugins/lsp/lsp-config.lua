@@ -21,6 +21,8 @@ return {
 				"solargraph",
 				"efm",
 				"clangd",
+				"black",
+				"prettier",
 			},
 		},
 	},
