@@ -15,9 +15,7 @@ if not vim.uv.fs_stat(lazypath) then
 end
 
 vim.opt.rtp:prepend(lazypath)
-
--- Add treesitter parser install dir to runtimepath
-vim.opt.rtp:append(vim.fn.stdpath("data") .. "/site")
+vim.opt.rtp:prepend(vim.fn.stdpath("data") .. "/site")
 
 -- =========================================================
 -- Basic UI options
@@ -86,7 +84,7 @@ map("n", "<leader><leader>", function()
 	require("snacks.picker").files()
 end, { desc = "Files" })
 
-map("n", "<leader>g", function()
+map("n", "<leader>/", function()
 	require("snacks.picker").grep()
 end, { desc = "Live Grep" })
 
