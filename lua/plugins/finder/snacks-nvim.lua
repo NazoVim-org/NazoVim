@@ -4,7 +4,7 @@ return {
 	lazy = false,
 	opts = {
 		notifier = {
-			enabled = false,
+			enabled = true,
 		},
 		-- =========================
 		-- Dashboard

@@ -4,7 +4,6 @@ return {
 		"folke/noice.nvim",
 		dependencies = {
 			"MunifTanjim/nui.nvim",
-			"rcarriga/nvim-notify", -- 通知をいい感じに
 		},
 		event = "VeryLazy",
 		opts = {
