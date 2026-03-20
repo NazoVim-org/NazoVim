@@ -67,7 +67,6 @@ nvim/
 | dropbar.nvim | Winbar / パンくずリスト |
 | flash.nvim | ジャンプ（`<CR>` でスマートジャンプ） |
 | aerial.nvim | シンボルアウトライン |
-| project.nvim | プロジェクトルート自動検出 |
 
 ### UI / 見た目
 
@@ -144,7 +143,7 @@ nvim/
 | キー | 動作 |
 |------|------|
 | `<Leader><Leader>` | ファイル検索 (snacks Picker) |
-| `<Leader>g` | Live Grep |
+| `<Leader>/` | Live Grep |
 | `<Leader>b` | バッファ一覧 |
 | `<Leader>r` | 最近使ったファイル |
 | `<Leader>h` | 検索ハイライト解除 |
