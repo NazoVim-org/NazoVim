@@ -17,6 +17,10 @@
 ![Neovim](https://img.shields.io/badge/Neovim-0.10%2B-blueviolet?logo=neovim)
 ![Nix](https://img.shields.io/badge/Nix-flake-blue?logo=nixos)
 
+> **Note:** The CI pipeline (`nvim.yml`) runs in a Nix environment and does
+> not test the plain `clone` installation path. If you install without Nix,
+> please verify startup manually with `nvim --headless +q`.
+
 </div>
 
 ---
@@ -96,14 +100,13 @@ nvim
 On first launch, lazy.nvim will automatically install all plugins.
 
 ### Files safe to delete after cloning (Option 2)
-- flake.nix
 - document/
-- .github/
 - LICENSE
 - SECURITY.md
 - CONTRIBUTING.md
 
-> These files have no effect on functionality, so leaving them in place is perfectly fine.
+> `flake.nix` and `.github/` are required for CI.
+> If you don't plan to submit PRs, you may delete only `.github/`.
 
 ---
 
@@ -258,7 +261,7 @@ On first launch, lazy.nvim will automatically install all plugins.
 | Key | Action |
 |-----|--------|
 | `<Leader><Leader>` | File search (snacks Picker) |
-| `<Leader>g` | Live Grep |
+| `<Leader>/` | Live Grep |
 | `<Leader>b` | Buffer list |
 | `<Leader>r` | Recent files |
 | `<Leader>h` | Clear search highlight |
