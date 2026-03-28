@@ -24,7 +24,7 @@ vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.cursorline = true
 
--- Insert モード中は relative number を無効化
+-- Disable relative number in Insert mode
 vim.api.nvim_create_autocmd("InsertEnter", {
 	callback = function()
 		vim.opt.relativenumber = false
@@ -76,17 +76,17 @@ local map = vim.keymap.set
 -- ---------------------------------------------------------
 map("n", "<leader>t", ":ToggleTerm<CR>", { desc = "Toggle terminal" })
 map("n", "<leader>c", ":Oil $HOME/dotfiles<CR>", { desc = "Open dotfiles in Oil" })
-map("n", "<leader>so", ":AerialToggle!<CR>")
+map("n", "<leader>so", ":AerialToggle!<CR>", { desc = "Toggle Aerial" })
 map("n", "<F2>", function()
 	require("snacks").zen.toggle()
 end, { desc = "Toggle Zen Mode" })
-map("n", "<leader>e", ":TroubleToggle<CR>")
+map("n", "<leader>e", ":TroubleToggle<CR>", { desc = "Toggle Trouble" })
 
 -- ---------------------------------------------------------
 -- LSP (Lspsaga / Actions)
 -- ---------------------------------------------------------
-map("n", "ga", "<cmd>Lspsaga code_action<CR>")
-map("n", "gd", "<cmd>Lspsaga goto_definition<CR>")
+map("n", "ga", "<cmd>Lspsaga code_action<CR>", { desc = "Code Action" })
+map("n", "gd", "<cmd>Lspsaga goto_definition<CR>", { desc = "Go to Definition" })
 
 map("n", "<leader>ca", function()
 	require("actions-preview").code_actions()

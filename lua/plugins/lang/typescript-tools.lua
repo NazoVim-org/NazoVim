@@ -13,21 +13,16 @@ return {
 	config = function()
 		require("typescript-tools").setup({
 			on_attach = function(client, bufnr)
-				-- formatting 完全無効
 				client.server_capabilities.documentFormattingProvider = false
 				client.server_capabilities.documentRangeFormattingProvider = false
-
-				-- semantic tokens 無効（かなり効く）
 				client.server_capabilities.semanticTokensProvider = nil
 
-				local function bufmap(mode, lhs, rhs)
-					vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true })
+				local function bufmap(mode, lhs, rhs, desc)
+					vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, silent = true, desc = desc })
 				end
 
-				bufmap("n", "gd", vim.lsp.buf.definition)
-				bufmap("n", "gr", "<cmd>Telescope lsp_references<CR>")
-				bufmap("n", "<leader>oi", "<cmd>TSToolsOrganizeImports<CR>")
-				bufmap("n", "<leader>ru", "<cmd>TSToolsRemoveUnused<CR>")
+				bufmap("n", "<leader>oi", "<cmd>TSToolsOrganizeImports<CR>", "Organize imports")
+				bufmap("n", "<leader>ru", "<cmd>TSToolsRemoveUnused<CR>", "Remove unused")
 			end,
 
 			settings = {
