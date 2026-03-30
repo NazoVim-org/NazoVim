@@ -14,6 +14,7 @@ arbitrary code, a compromised dependency, or an unsafe default), please open a
 Go to: **Security → Advisories → New draft security advisory**
 
 Please include:
+
 - A description of the issue
 - Steps to reproduce
 - Affected plugin(s) or component(s)

@@ -1,6 +1,6 @@
-<div align="center">
+# NazoVim
 
-```
+```text
 █   █  ███  █████  ███  █   █ ███ █   █
 ██  █ █   █     █ █   █ █   █  █  ██ ██
 █ █ █ █   █    █  █   █ █   █  █  █ █ █
@@ -21,14 +21,15 @@
 > 自動テストされていません。Nixを使わない場合は `nvim --headless +q` で
 > 手動確認することを推奨します。
 
-</div>
-
 ---
 
 ## ✨ About
 
-**nazovim** は、CLI・TUI中心のワークフローに特化した個人向けNeovimディストリビューションです。  
+**nazovim** は、CLI・TUI中心のワークフローに特化した個人向けNeovimディストリビューションです。
+
+<!-- markdownlint-disable MD013 -->
 [kanagawa](https://github.com/rebelot/kanagawa.nvim) カラースキームと [lazy.nvim](https://github.com/folke/lazy.nvim) による高速な遅延ロードを基盤に、TypeScript・Lua・Nix・Rubyなどの開発に必要なすべてが揃っています。
+<!-- markdownlint-enable MD013 -->
 
 > Nixのflakeとして配布しているため、`nix run` 一発で隔離された状態から即起動できます。
 
@@ -42,29 +43,31 @@
 
 ## 🚀 Features
 
+<!-- markdownlint-disable MD013 -->
 - **⚡ Fast startup** — lazy.nvim によるアグレッシブな遅延ロード。起動を邪魔するものは VeryLazy 以降に追いやる
 - **🔧 Full LSP** — TypeScript / Lua / Ruby / Nix / C / Java / Zig など多言語対応。mason + 手動 (nixd) の両刀
 - **🎨 kanagawa** — `kanagawa-dragon` テーマ + 透明背景でターミナルと溶け込む
 - **🧠 AI統合** — Claude Code (`claudecode.nvim`) と opencode (`opencode.nvim`) を両方サポート
 - **🌊 snacks.nvim** — Dashboard・Picker・Zen mode・セッション管理をまとめて統一
 - **🐛 DAP** — JavaScript / TypeScript のデバッグ環境を最小構成で内包
-- **📦 Nix対応** — `nix run` で隔離起動 / `nix develop` でLSP完備のdevShell
+- **📦 Nix対応** — `nix run` で隔離起動 / `nix develop` でLSP完备のdevShell
 - **🧪 テスト** — neotest + Jest / Vitest / Playwright アダプタ
 - **🔍 Fuzzy finding** — snacks.nvim Picker (ivy layout) をメイン、Telescope をサブとして併用
 - **📝 Treesitter textobjects** — 関数・クラス・引数単位の高精度テキストオブジェクト
+<!-- markdownlint-enable MD013 -->
 
 ---
 
 ## 📋 Requirements
 
 | 必須 | バージョン |
-|------|------------|
+| ---- | ---------- |
 | Neovim | 0.10+ |
 | Git | any |
 | [Nerd Font](https://www.nerdfonts.com/) | アイコン表示に必要 |
 
 | 推奨 | 用途 |
-|------|------|
+| ---- | ---- |
 | Nix (flakes対応) | `nix run` / `nix develop` での隔離起動 |
 | Node.js | TypeScript LSP / prettier |
 | lazygit | LazyGit統合 |
@@ -82,7 +85,9 @@
 nix run github:nazozokc/nazozokc.nvim.config
 ```
 
+<!-- markdownlint-disable MD013 -->
 設定は `~/.config/nvim-nazozokc` に隔離して展開されるため、既存のNeovim設定を汚しません。
+<!-- markdownlint-enable MD013 -->
 
 ### 方法2: Clone（Nix 不要）
 
@@ -100,6 +105,7 @@ nvim
 初回起動時に lazy.nvim がすべてのプラグインを自動インストールします。
 
 ### 方法2でクローン後に削除しても良いファイル
+
 - document/
 - LICENSE
 - SECURITY.md
@@ -112,11 +118,11 @@ nvim
 
 ## 🗂️ Directory Structure
 
-```
+```text
 .
 ├── flake.nix             # Nix flake (nix run / nix develop)
 ├── init.lua              # エントリーポイント・キーマップ定義
-├── lazy-lock.json        # プラグインバージョンロック
+├── lazy-lock.json        # プラグンバージョンロック
 ├── lua/
 │   ├── vim-options.lua   # 基本vim設定
 │   ├── plugins.lua       # lazy.nvim エントリ (空 = plugins/ 以下を自動読み込み)
@@ -136,11 +142,10 @@ nvim
 
 ## 🔌 Plugins
 
-<details>
-<summary><b>LSP / 補完</b></summary>
+### LSP / 補完
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | nvim-lspconfig + mason | LSP管理 |
 | typescript-tools.nvim | TypeScript専用LSP（高速化設定済み） |
 | nvim-cmp | 補完エンジン |
@@ -153,13 +158,10 @@ nvim
 | tiny-inline-diagnostic.nvim | インライン診断 |
 | lazydev.nvim | Lua/Neovim API の補完・型チェック強化 |
 
-</details>
-
-<details>
-<summary><b>Fuzzy Finder / ナビゲーション</b></summary>
+### Fuzzy Finder / ナビゲーション
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | snacks.nvim | Picker / Dashboard / Zen / Words / Session |
 | telescope.nvim | ファジーファインダー（サブ） |
 | oil.nvim | バッファベースのファイルエクスプローラー |
@@ -170,13 +172,10 @@ nvim
 | aerial.nvim | シンボルアウトライン |
 | project.nvim | プロジェクトルート自動検出 |
 
-</details>
-
-<details>
-<summary><b>UI / 見た目</b></summary>
+### UI / 見た目
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | kanagawa.nvim | カラースキーム（dragon + 透明） |
 | lualine.nvim | ステータスライン |
 | barbar.nvim | タブバー |
@@ -190,26 +189,20 @@ nvim
 | render-markdown.nvim | Markdownのリッチレンダリング |
 | nvim-highlight-colors | カラーコードのインラインプレビュー |
 
-</details>
-
-<details>
-<summary><b>Git</b></summary>
+### Git (Plugins)
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | gitsigns.nvim | Git差分サインカラム |
 | diffview.nvim | 差分ビュー / ファイル履歴 |
 | lazygit.nvim | LazyGit統合 |
 | vim-fugitive | Git操作 |
 | octo.nvim | GitHub Issue / PR / Notification 操作 |
 
-</details>
-
-<details>
-<summary><b>エディタ機能</b></summary>
+### エディタ機能
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | nvim-treesitter | シンタックスハイライト / インデント |
 | nvim-treesitter-textobjects | 関数・クラス・引数単位のテキストオブジェクト |
 | nvim-autopairs | 括弧自動補完 |
@@ -222,32 +215,24 @@ nvim
 | kulala.nvim | REST client (.http ファイル) |
 | persistence.nvim | セッション管理 |
 
-</details>
-
-<details>
-<summary><b>AI統合</b></summary>
+### AI統合
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | claudecode.nvim | Claude Code統合 |
 | opencode.nvim | opencode統合 |
 | CopilotChat.nvim | GitHub Copilot Chat |
 | copilot.lua | GitHub Copilot補完 |
 
-</details>
-
-<details>
-<summary><b>デバッグ / テスト</b></summary>
+### デバッグ / テスト
 
 | プラグイン | 用途 |
-|------------|------|
+| ---------- | ---- |
 | nvim-dap + nvim-dap-ui | デバッガー |
 | nvim-dap-vscode-js | JS/TS デバッグアダプタ |
 | neotest | テストランナー |
 | neotest-jest / vitest / playwright | テストアダプタ |
 | nvim-coverage | カバレッジ表示 |
-
-</details>
 
 ---
 
@@ -255,11 +240,10 @@ nvim
 
 `<Leader>` = `Space`
 
-<details>
-<summary><b>基本</b></summary>
+### 基本
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<Leader><Leader>` | ファイル検索 (snacks Picker) |
 | `<Leader>/` | Live Grep |
 | `<Leader>b` | バッファ一覧 |
@@ -271,13 +255,10 @@ nvim
 | `<Leader>t` | フローティングターミナル |
 | `<Leader>f` | フォーマット |
 
-</details>
-
-<details>
-<summary><b>LSP</b></summary>
+### LSP
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `K` | ホバー |
 | `gd` | 定義へ移動 |
 | `ga` | コードアクション (Lspsaga) |
@@ -287,13 +268,10 @@ nvim
 | `<Leader>oi` | Import整理 (TS) |
 | `<Leader>ru` | 未使用削除 (TS) |
 
-</details>
-
-<details>
-<summary><b>Treesitter Textobjects</b></summary>
+### Treesitter Textobjects
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `af` / `if` | outer / inner 関数 |
 | `ac` / `ic` | outer / inner クラス |
 | `aa` / `ia` | outer / inner 引数 |
@@ -306,13 +284,10 @@ nvim
 | `<Leader>sn` | 次の引数と swap |
 | `<Leader>sp` | 前の引数と swap |
 
-</details>
-
-<details>
-<summary><b>Git</b></summary>
+### Git (Keymaps)
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<Leader>gd` | DiffviewOpen |
 | `<Leader>gh` | ファイル履歴 |
 | `<Leader>gH` | ブランチ履歴 |
@@ -320,25 +295,19 @@ nvim
 | `<Leader>gp` | Hunkプレビュー |
 | `<Leader>gt` | Blame toggle |
 
-</details>
-
-<details>
-<summary><b>セッション</b></summary>
+### セッション
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<Leader>qs` | セッション復元 |
 | `<Leader>qS` | セッション選択 |
 | `<Leader>ql` | 最後のセッションを復元 |
 | `<Leader>qd` | セッション保存を停止 |
 
-</details>
-
-<details>
-<summary><b>AI</b></summary>
+### AI
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<Leader>ac` | Claude Code toggle |
 | `<Leader>af` | Claude Code focus |
 | `<Leader>ab` | 現在バッファを追加 |
@@ -346,13 +315,10 @@ nvim
 | `<C-x>` | opencode select action |
 | `<C-.>` | opencode toggle |
 
-</details>
-
-<details>
-<summary><b>DAP</b></summary>
+### DAP
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<F5>` | 実行 / 継続 |
 | `<F10>` | ステップオーバー |
 | `<F11>` | ステップイン |
@@ -360,31 +326,23 @@ nvim
 | `<Leader>db` | ブレークポイント切替 |
 | `<Leader>du` | DAP UI toggle |
 
-</details>
-
-<details>
-<summary><b>テスト</b></summary>
+### テスト
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<leader>tr` | 最寄りのテスト実行 |
 | `<leader>tR` | 全テスト実行 |
 | `<leader>tf` | ファイルのテスト実行 |
 | `<leader>to` | テスト出力 toggle |
 
-</details>
-
-<details>
-<summary><b>ウィンドウ / バッファ</b></summary>
+### ウィンドウ / バッファ
 
 | キー | 動作 |
-|------|------|
+| ---- | ---- |
 | `<C-h/j/k/l>` | ウィンドウ移動 (tmux対応) |
 | `<C-PageDown/Up>` | バッファ切替 |
 | `<C-t>` | 新規バッファ |
 | `<C-q>` | バッファを閉じる |
-
-</details>
 
 ---
 
@@ -410,6 +368,8 @@ nvim
 ## 🔧 Customization
 
 `lua/plugins/` 以下にLuaファイルを追加するだけで自動でロードされます。
+
+<!-- markdownlint-disable MD013 -->
 ```lua
 -- lua/plugins/my-config.lua
 
@@ -419,8 +379,10 @@ return {
   opts = {}
 }
 ```
+<!-- markdownlint-enable MD013 -->
 
 既存プラグインの設定を上書きする場合も同じファイルに書けます。
+
 ```lua
 return {
   "rebelot/kanagawa.nvim",
@@ -440,7 +402,7 @@ return {
 # 隔離起動（設定を汚さない）
 nix run github:nazozokc/nazovim
 
-# LSP/formatter 完備の開発シェル
+# LSP/formatter 完备の開発シェル
 nix develop github:nazozokc/nazovim
 
 # 設定ファイルだけビルド
@@ -454,10 +416,13 @@ nix build github:nazozokc/nazovim
 
 ## 🐛 Contributing
 
-Issue・PRはお気軽にどうぞ。  
+Issue・PRはお気軽にどうぞ。
+<!-- markdownlint-disable MD013 -->
 質問は [GitHub Discussions](https://github.com/nazozokc/nazozokc.nvim.config/discussions) へ。
+<!-- markdownlint-enable MD013 -->
 
 Issue templateが用意されています:
+
 - 🐛 **Bug Report** — 再現手順・Neovimバージョン・エラーログ付きで
 - ✨ **Feature Request** — 動機と提案内容を
 - 🔌 **Plugin Proposal** — プラグイン名・URL・lazy.nvimの設定案を

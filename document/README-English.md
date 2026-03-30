@@ -1,6 +1,6 @@
-<div align="center">
+# NazoVim
 
-```
+```text
 █   █  ███  █████  ███  █   █ ███ █   █
 ██  █ █   █     █ █   █ █   █  █  ██ ██
 █ █ █ █   █    █  █   █ █   █  █  █ █ █
@@ -21,16 +21,16 @@
 > not test the plain `clone` installation path. If you install without Nix,
 > please verify startup manually with `nvim --headless +q`.
 
-</div>
-
 ---
 
 ## ✨ About
 
-**nazovim** is a personal Neovim distribution tailored for CLI/TUI-centric workflows.  
+<!-- markdownlint-disable MD013 -->
+**nazovim** is a personal Neovim distribution tailored for CLI/TUI-centric workflows.
 Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme and aggressive lazy-loading via [lazy.nvim](https://github.com/folke/lazy.nvim), it comes with everything needed for TypeScript, Lua, Nix, Ruby, and more.
 
 > Distributed as a Nix flake — run it instantly in an isolated environment with a single `nix run` command.
+<!-- markdownlint-enable MD013 -->
 
 ---
 
@@ -42,6 +42,7 @@ Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme a
 
 ## 🚀 Features
 
+<!-- markdownlint-disable MD013 -->
 - **⚡ Fast startup** — Aggressive lazy-loading with lazy.nvim. Anything that can wait is deferred to `VeryLazy`
 - **🔧 Full LSP** — Multi-language support: TypeScript / Lua / Ruby / Nix / C / Java / Zig and more. Dual setup with mason + manual (nixd)
 - **🎨 kanagawa** — `kanagawa-dragon` theme with transparent background that blends seamlessly with your terminal
@@ -52,19 +53,20 @@ Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme a
 - **🧪 Testing** — neotest with Jest / Vitest / Playwright adapters
 - **🔍 Fuzzy finding** — snacks.nvim Picker (ivy layout) as primary, Telescope as secondary
 - **📝 Treesitter textobjects** — High-precision text objects at function / class / argument granularity
+<!-- markdownlint-enable MD013 -->
 
 ---
 
 ## 📋 Requirements
 
 | Required | Version |
-|----------|---------|
+| -------- | ------- |
 | Neovim | 0.10+ |
 | Git | any |
 | [Nerd Font](https://www.nerdfonts.com/) | Required for icons |
 
 | Recommended | Purpose |
-|-------------|---------|
+| ----------- | ------- |
 | Nix (with flakes) | Isolated launch via `nix run` / `nix develop` |
 | Node.js | TypeScript LSP / prettier |
 | lazygit | LazyGit integration |
@@ -82,11 +84,15 @@ Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme a
 nix run github:nazozokc/nazozokc.nvim.config
 ```
 
+<!-- markdownlint-disable MD013 -->
 The configuration is deployed in isolation under `~/.config/nvim-nazozokc`, leaving your existing Neovim setup untouched.
+<!-- markdownlint-enable MD013 -->
 
 ### Option 2: Clone (no Nix required)
 
+<!-- markdownlint-disable MD013 -->
 > **Warning**: This will overwrite your existing Neovim configuration. A backup is recommended.
+<!-- markdownlint-enable MD013 -->
 >
 > ```bash
 > mv ~/.config/nvim ~/.config/nvim.backup  # backup (optional)
@@ -100,6 +106,7 @@ nvim
 On first launch, lazy.nvim will automatically install all plugins.
 
 ### Files safe to delete after cloning (Option 2)
+
 - document/
 - LICENSE
 - SECURITY.md
@@ -112,7 +119,7 @@ On first launch, lazy.nvim will automatically install all plugins.
 
 ## 🗂️ Directory Structure
 
-```
+```text
 .
 ├── flake.nix             # Nix flake (nix run / nix develop)
 ├── init.lua              # Entry point & keymap definitions
@@ -136,11 +143,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 
 ## 🔌 Plugins
 
-<details>
-<summary><b>LSP / Completion</b></summary>
+### LSP / Completion
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | nvim-lspconfig + mason | LSP management |
 | typescript-tools.nvim | TypeScript-specific LSP (performance-tuned) |
 | nvim-cmp | Completion engine |
@@ -153,13 +159,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 | tiny-inline-diagnostic.nvim | Inline diagnostics |
 | lazydev.nvim | Enhanced Lua/Neovim API completion and type checking |
 
-</details>
-
-<details>
-<summary><b>Fuzzy Finder / Navigation</b></summary>
+### Fuzzy Finder / Navigation
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | snacks.nvim | Picker / Dashboard / Zen / Words / Session |
 | telescope.nvim | Fuzzy finder (secondary) |
 | oil.nvim | Buffer-based file explorer |
@@ -170,13 +173,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 | aerial.nvim | Symbol outline |
 | project.nvim | Automatic project root detection |
 
-</details>
-
-<details>
-<summary><b>UI / Appearance</b></summary>
+### UI / Appearance
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | kanagawa.nvim | Color scheme (dragon + transparent) |
 | lualine.nvim | Status line |
 | barbar.nvim | Tab bar |
@@ -190,26 +190,20 @@ On first launch, lazy.nvim will automatically install all plugins.
 | render-markdown.nvim | Rich Markdown rendering |
 | nvim-highlight-colors | Inline color code preview |
 
-</details>
-
-<details>
-<summary><b>Git</b></summary>
+### Git (Plugins)
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | gitsigns.nvim | Git diff sign column |
 | diffview.nvim | Diff view / file history |
 | lazygit.nvim | LazyGit integration |
 | vim-fugitive | Git operations |
 | octo.nvim | GitHub Issues / PRs / Notifications |
 
-</details>
-
-<details>
-<summary><b>Editor</b></summary>
+### Editor
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | nvim-treesitter | Syntax highlighting / indentation |
 | nvim-treesitter-textobjects | Function / class / argument text objects |
 | nvim-autopairs | Automatic bracket closing |
@@ -222,32 +216,24 @@ On first launch, lazy.nvim will automatically install all plugins.
 | kulala.nvim | REST client (.http files) |
 | persistence.nvim | Session management |
 
-</details>
-
-<details>
-<summary><b>AI Integration</b></summary>
+### AI Integration
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | claudecode.nvim | Claude Code integration |
 | opencode.nvim | opencode integration |
 | CopilotChat.nvim | GitHub Copilot Chat |
 | copilot.lua | GitHub Copilot completion |
 
-</details>
-
-<details>
-<summary><b>Debug / Test</b></summary>
+### Debug / Test
 
 | Plugin | Purpose |
-|--------|---------|
+| ------ | ------ |
 | nvim-dap + nvim-dap-ui | Debugger |
 | nvim-dap-vscode-js | JS/TS debug adapter |
 | neotest | Test runner |
 | neotest-jest / vitest / playwright | Test adapters |
 | nvim-coverage | Coverage display |
-
-</details>
 
 ---
 
@@ -255,11 +241,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 
 `<Leader>` = `Space`
 
-<details>
-<summary><b>General</b></summary>
+### General
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<Leader><Leader>` | File search (snacks Picker) |
 | `<Leader>/` | Live Grep |
 | `<Leader>b` | Buffer list |
@@ -271,13 +256,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 | `<Leader>t` | Floating terminal |
 | `<Leader>f` | Format |
 
-</details>
-
-<details>
-<summary><b>LSP</b></summary>
+### LSP
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `K` | Hover |
 | `gd` | Go to definition |
 | `ga` | Code action (Lspsaga) |
@@ -287,13 +269,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 | `<Leader>oi` | Organize imports (TS) |
 | `<Leader>ru` | Remove unused (TS) |
 
-</details>
-
-<details>
-<summary><b>Treesitter Textobjects</b></summary>
+### Treesitter Textobjects
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `af` / `if` | outer / inner function |
 | `ac` / `ic` | outer / inner class |
 | `aa` / `ia` | outer / inner argument |
@@ -306,13 +285,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 | `<Leader>sn` | Swap with next argument |
 | `<Leader>sp` | Swap with previous argument |
 
-</details>
-
-<details>
-<summary><b>Git</b></summary>
+### Git (Keymaps)
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<Leader>gd` | DiffviewOpen |
 | `<Leader>gh` | File history |
 | `<Leader>gH` | Branch history |
@@ -320,25 +296,19 @@ On first launch, lazy.nvim will automatically install all plugins.
 | `<Leader>gp` | Hunk preview |
 | `<Leader>gt` | Blame toggle |
 
-</details>
-
-<details>
-<summary><b>Session</b></summary>
+### Session
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<Leader>qs` | Restore session |
 | `<Leader>qS` | Select session |
 | `<Leader>ql` | Restore last session |
 | `<Leader>qd` | Stop saving session |
 
-</details>
-
-<details>
-<summary><b>AI</b></summary>
+### AI
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<Leader>ac` | Claude Code toggle |
 | `<Leader>af` | Claude Code focus |
 | `<Leader>ab` | Add current buffer |
@@ -346,13 +316,10 @@ On first launch, lazy.nvim will automatically install all plugins.
 | `<C-x>` | opencode select action |
 | `<C-.>` | opencode toggle |
 
-</details>
-
-<details>
-<summary><b>DAP</b></summary>
+### DAP
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<F5>` | Run / Continue |
 | `<F10>` | Step over |
 | `<F11>` | Step into |
@@ -360,31 +327,23 @@ On first launch, lazy.nvim will automatically install all plugins.
 | `<Leader>db` | Toggle breakpoint |
 | `<Leader>du` | DAP UI toggle |
 
-</details>
-
-<details>
-<summary><b>Test</b></summary>
+### Test
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<leader>tr` | Run nearest test |
 | `<leader>tR` | Run all tests |
 | `<leader>tf` | Run tests in file |
 | `<leader>to` | Toggle test output |
 
-</details>
-
-<details>
-<summary><b>Window / Buffer</b></summary>
+### Window / Buffer
 
 | Key | Action |
-|-----|--------|
+| ---- | ----- |
 | `<C-h/j/k/l>` | Window navigation (tmux-aware) |
 | `<C-PageDown/Up>` | Switch buffer |
 | `<C-t>` | New buffer |
 | `<C-q>` | Close buffer |
-
-</details>
 
 ---
 
@@ -456,10 +415,13 @@ nix build github:nazozokc/nazovim
 
 ## 🐛 Contributing
 
-Issues and PRs are always welcome.  
+Issues and PRs are always welcome.
+<!-- markdownlint-disable MD013 -->
 For questions, head over to [GitHub Discussions](https://github.com/nazozokc/nazozokc.nvim.config/discussions).
+<!-- markdownlint-enable MD013 -->
 
 Issue templates are available for:
+
 - 🐛 **Bug Report** — Include reproduction steps, Neovim version, and error logs
 - ✨ **Feature Request** — Describe your motivation and proposed solution
 - 🔌 **Plugin Proposal** — Include plugin name, URL, and a lazy.nvim config snippet
