@@ -25,7 +25,7 @@
 
 ## ✨ About
 
-**nazovim** は、CLI・TUI中心のワークフローに特化した個人向けNeovimディストリビューションです。
+**nazovim** は、CLI・TUI中心のワークフローに特化したNeovimディストリビューションです。
 
 <!-- markdownlint-disable MD013 -->
 [kanagawa](https://github.com/rebelot/kanagawa.nvim) カラースキームと [lazy.nvim](https://github.com/folke/lazy.nvim) による高速な遅延ロードを基盤に、TypeScript・Lua・Nix・Rubyなどの開発に必要なすべてが揃っています。
