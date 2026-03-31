@@ -18,6 +18,15 @@
       perSystem =
         { pkgs, ... }:
         let
+          neovim_12 = pkgs.neovim.overrideAttrs (oldAttrs: {
+            version = "0.12.0";
+            src = pkgs.fetchFromGitHub {
+              owner = "neovim";
+              repo = "neovim";
+              rev = "v0.12.0";
+              hash = "sha256-uWhrGAwQ2nnAkyJ46qGkYxJ5K1jtyUIQOAVu3yTlquk=";
+            };
+          });
           # このリポジトリの設定ファイルを Nix store にコピー
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazovim";
@@ -36,7 +45,7 @@
           nvim-nazozokc = pkgs.writeShellApplication {
             name = "nvim";
             runtimeInputs = [
-              pkgs.neovim
+              neovim_12
               pkgs.git # lazy.nvim の自己 bootstrap に必要
               pkgs.clang-tools # clangd
               pkgs.jdt-language-server # jdtls
@@ -80,7 +89,7 @@
           # NVIM_APPNAME も自動でセットされるので nvim を叩くだけで隔離環境に入る
           devShells.default = pkgs.mkShell {
             packages = with pkgs; [
-              neovim
+              neovim_12
               git
 
               # LSP
