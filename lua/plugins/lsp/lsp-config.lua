@@ -18,9 +18,7 @@ return {
 				"black",
 				"prettier",
 			},
-			automatic_enable = {
-				exclude = { "ts_ls" },
-			},
+			automatic_enable = true,
 		},
 	},
 	{
@@ -72,14 +70,7 @@ return {
 				root_dir = vim.fs.root(0, { ".git", "mvnw", "gradlew", "pom.xml", "build.gradle" }),
 			})
 
-			vim.lsp.enable({
-				"html",
-				"lua_ls",
-				"solargraph",
-				"efm",
-				"clangd",
-				"nixd",
-			})
+			vim.lsp.enable({ "nixd" })
 		end,
 	},
 }
