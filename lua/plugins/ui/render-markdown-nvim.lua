@@ -28,8 +28,8 @@ return {
 
 		checkbox = {
 			enabled = true,
-			unchecked = "󰄱 ",
-			checked = "󰄵 ",
+			unchecked = { icon = "󰄱 " },
+			checked = { icon = "󰄵 " },
 			custom = {
 				todo = { raw = "[~]", rendered = "󰥔 ", highlight = "DiagnosticWarn" },
 			},
