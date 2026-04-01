@@ -1,53 +1,41 @@
 return {
-	"simrat39/rust-tools.nvim",
+	"mrcjkb/rustaceanvim",
+	version = "^5",
 	ft = { "rust" },
-	dependencies = {
-		"neovim/nvim-lspconfig",
-		"nvim-lua/plenary.nvim",
-		"folke/which-key.nvim",
-	},
-	config = function()
-		local rt = require("rust-tools")
-
-		rt.setup({
+	init = function()
+		vim.g.rustaceanvim = {
 			tools = {
-				autoSetHints = true,
-				hover_with_actions = true,
+				hover_actions = { auto_focus = false },
 			},
 			server = {
+				on_attach = function(_, bufnr)
+					vim.keymap.set("n", "K", function()
+						vim.cmd.RustLsp({ "hover", "actions" })
+					end, { buffer = bufnr, desc = "Rust hover actions" })
+
+					vim.keymap.set("n", "<leader>rr", function()
+						vim.cmd.RustLsp("runnables")
+					end, { buffer = bufnr, desc = "Rust runnables" })
+
+					vim.keymap.set("n", "<leader>rd", function()
+						vim.cmd.RustLsp("debuggables")
+					end, { buffer = bufnr, desc = "Rust debuggables" })
+
+					vim.keymap.set("n", "<leader>rh", function()
+						vim.cmd.RustLsp({ "hover", "range" })
+					end, { buffer = bufnr, desc = "Rust hover range" })
+
+					vim.keymap.set("n", "<leader>ca", function()
+						vim.cmd.RustLsp("codeAction")
+					end, { buffer = bufnr, desc = "Rust code action" })
+				end,
 				settings = {
 					["rust-analyzer"] = {
-						cargo = {
-							allFeatures = true,
-						},
-						checkOnSave = {
-							command = "clippy",
-						},
+						cargo = { allFeatures = true },
+						checkOnSave = { command = "clippy" },
 					},
 				},
-				on_attach = function(_, bufnr)
-					local wk = require("which-key")
-
-					wk.add({
-						{ "K", vim.lsp.buf.hover, buffer = bufnr, desc = "Hover docs" },
-						{ "gd", vim.lsp.buf.definition, buffer = bufnr, desc = "Go to definition" },
-						{ "gr", vim.lsp.buf.references, buffer = bufnr, desc = "References" },
-						{ "gi", vim.lsp.buf.implementation, buffer = bufnr, desc = "Implementation" },
-						{ "<leader>ca", vim.lsp.buf.code_action, buffer = bufnr, desc = "Code Action" },
-						{ "<leader>rn", vim.lsp.buf.rename, buffer = bufnr, desc = "Rename" },
-						{ "<leader>rr", rt.runnables.runnables, buffer = bufnr, desc = "Rust Runnables" },
-						{ "<leader>rd", rt.debuggables.debuggables, buffer = bufnr, desc = "Rust Debuggables" },
-					})
-
-					-- Toggle Inlay Hints
-					vim.keymap.set(
-						"n",
-						"<leader>th",
-						rt.toggle_hints,
-						{ buffer = bufnr, desc = "Toggle Rust Inlay Hints" }
-					)
-				end,
 			},
-		})
+		}
 	end,
 }
