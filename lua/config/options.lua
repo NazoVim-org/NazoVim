@@ -10,9 +10,10 @@ vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "v:lua.vim.lsp.foldexpr()"
 vim.opt.foldlevel = 99
 
--- Navigate vim panes better
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.cursorline = true
 
-vim.keymap.set("n", "<leader>h", ":nohlsearch<CR>")
 vim.opt.wildmenu = true
 vim.opt.wildmode = "longest:full,full"
 vim.opt.wildignorecase = true
