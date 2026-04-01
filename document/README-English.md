@@ -154,7 +154,7 @@ On first launch, lazy.nvim will automatically install all plugins.
 | lspsaga.nvim | Enhanced LSP UI |
 | actions-preview.nvim | Code action preview |
 | conform.nvim | Formatter (stylua / prettier / etc.) |
-| none-ls.nvim | Additional diagnostics (rubocop, etc.) |
+| nvim-lint | Additional diagnostics (rubocop, etc.) |
 | fidget.nvim | LSP progress display |
 | tiny-inline-diagnostic.nvim | Inline diagnostics |
 | lazydev.nvim | Enhanced Lua/Neovim API completion and type checking |

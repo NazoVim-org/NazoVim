@@ -147,7 +147,7 @@ nvim
 | lspsaga.nvim | LSP UI拡張 |
 | actions-preview.nvim | コードアクションプレビュー |
 | conform.nvim | フォーマッター（stylua / prettier等） |
-| none-ls.nvim | rubocop等の追加診断 |
+| nvim-lint | rubocop等の追加診断 |
 | fidget.nvim | LSPプログレス表示 |
 | tiny-inline-diagnostic.nvim | インライン診断 |
 | lazydev.nvim | Lua/Neovim API の補完・型チェック強化 |
