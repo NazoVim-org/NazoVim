@@ -4,7 +4,9 @@ return {
 	ft = { "json" },
 	config = function()
 		local function detect_package_manager()
-			local root = vim.fs.root(0, { "pnpm-lock.yaml", "yarn.lock", "package-lock.json", "bun.lockb", "package.json" })
+
+  		local root =
+				vim.fs.root(0, { "pnpm-lock.yaml", "yarn.lock", "package-lock.json", "bun.lockb", "package.json" })
 			if not root then
 				return "npm"
 			end
