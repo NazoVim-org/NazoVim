@@ -3,14 +3,6 @@ local map = vim.keymap.set
 -- UI / Toggle
 map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear search highlight" })
 map("n", "<leader>t", ":ToggleTerm<CR>", { desc = "Toggle terminal" })
-map("n", "<leader>c", function()
-	local dotfiles = vim.fn.expand("$HOME/dotfiles")
-	if vim.uv.fs_stat(dotfiles) then
-		vim.cmd("Oil " .. dotfiles)
-	else
-		vim.notify("Dotfiles directory not found at " .. dotfiles, vim.log.levels.WARN)
-	end
-end, { desc = "Open dotfiles in Oil" })
 map("n", "<leader>so", ":AerialToggle!<CR>", { desc = "Toggle Aerial" })
 map("n", "<F2>", function()
 	require("snacks").zen.toggle()
@@ -50,4 +42,3 @@ end, { desc = "Zen Mode" })
 map("n", "<leader>;", function()
 	require("dropbar.api").pick()
 end, { desc = "Dropbar pick symbol" })
-
