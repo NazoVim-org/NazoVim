@@ -3,6 +3,15 @@
 <!-- markdownlint-disable-file MD024 MD013 -->
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
 
+## [v1.1.0](https://github.com/NazoVim-org/NazoVim/releases/tag/v1.1.0) (2026-04-02)
+### What's Changed
+* refactor: modularize config and migrate none-ls to conform + nvim-lint by @nazozokc in https://github.com/NazoVim-*org/NazoVim/pull/58
+* add codex.nvim plugins
+* fix: code review fixes by @nazozokc in https://github.com/NazoVim-org/NazoVim/pull/59
+* fix: pin nvim-treesitter to master branch by @nazozokc in https://github.com/NazoVim-org/NazoVim/pull/60
+* fix: migrate to new nvim-treesitter API by @nazozokc in https://github.com/NazoVim-org/NazoVim/pull/61
+**Full Changelog**: https://github.com/NazoVim-org/NazoVim/compare/v1.0.7...v1.1.0
+
 ## [v1.0.7](https://github.com/NazoVim-org/NazoVim/releases/tag/v1.0.7) (2026-04-01)
 
 ### 🐛 Bug Fixes
