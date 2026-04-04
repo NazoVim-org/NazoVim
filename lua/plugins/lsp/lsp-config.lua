@@ -13,7 +13,6 @@ return {
 				"html",
 				"lua_ls",
 				"solargraph",
-				"efm",
 				"clangd",
 			},
 			automatic_enable = true,
@@ -59,8 +58,6 @@ return {
 			vim.lsp.config("solargraph", { capabilities = capabilities })
 
 			vim.lsp.config("nixd", { capabilities = capabilities })
-
-			vim.lsp.config("efm", { capabilities = capabilities })
 
 			vim.lsp.config("clangd", { capabilities = capabilities })
 
