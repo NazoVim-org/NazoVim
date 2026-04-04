@@ -71,7 +71,7 @@ return {
 						path = "[PATH]",
 					})[entry.source.name]
 
-					tailwindcss_colorizer.format(entry, item)
+					tailwindcss_colorizer.formatter(entry, item)
 
 					return item
 				end,
