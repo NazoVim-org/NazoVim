@@ -36,8 +36,7 @@ return {
 			end,
 			desc = "Toggle test output",
 		},
-
-  },
+	},
 	opts = function(_, opts)
 		opts.adapters = opts.adapters or {}
 
