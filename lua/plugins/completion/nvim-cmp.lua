@@ -14,9 +14,6 @@ return {
 		"saadparwaiz1/cmp_luasnip",
 		"rafamadriz/friendly-snippets",
 
-		-- Denippet (VSCode snippet integration)
-		"uga-rosa/cmp-denippet",
-
 		-- TailwindCSS color display
 		"roobert/tailwindcss-colorizer-cmp.nvim",
 	},
@@ -106,7 +103,6 @@ return {
 			sources = {
 				{ name = "luasnip", priority = 1000 },
 				{ name = "nvim_lsp", priority = 900 },
-				{ name = "denippet", priority = 800 },
 				{ name = "path", priority = 500 },
 				{ name = "buffer", priority = 250 },
 			},
