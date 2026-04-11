@@ -8,7 +8,6 @@ return {
 		"hrsh7th/cmp-buffer",
 		"hrsh7th/cmp-path",
 		"hrsh7th/cmp-calc",
-		"uga-rosa/cmp-denippet",
 		"zbirenbaum/copilot-cmp",
 
 		-- Snippets
@@ -102,14 +101,13 @@ return {
 				end,
 			}),
 
-			sources = {
-				{ name = "denippet", priority = 1100 },
-				{ name = "copilot", priority = 1050 },
-				{ name = "luasnip", priority = 1000 },
-				{ name = "nvim_lsp", priority = 900 },
-				{ name = "path", priority = 500 },
-				{ name = "buffer", priority = 250 },
-			},
+		sources = {
+			{ name = "copilot", priority = 1050 },
+			{ name = "luasnip", priority = 1000 },
+			{ name = "nvim_lsp", priority = 900 },
+			{ name = "path", priority = 500 },
+			{ name = "buffer", priority = 250 },
+		},
 
 			experimental = {
 				ghost_text = {
