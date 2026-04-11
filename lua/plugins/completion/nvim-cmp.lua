@@ -103,7 +103,6 @@ return {
 			}),
 
 			sources = {
-				{ name = "denippet", priority = 1100 },
 				{ name = "copilot", priority = 1050 },
 				{ name = "luasnip", priority = 1000 },
 				{ name = "nvim_lsp", priority = 900 },
