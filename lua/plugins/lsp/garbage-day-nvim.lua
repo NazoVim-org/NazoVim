@@ -1,6 +1,6 @@
 return {
 	"zeioth/garbage-day.nvim",
-	cmd = { "GarbageDay" },
+	event = "LspAttach",
 	dependencies = "neovim/nvim-lspconfig",
 	config = function()
 		require("garbage-day").setup({

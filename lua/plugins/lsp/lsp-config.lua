@@ -39,7 +39,7 @@ return {
 					end
 					local opts = { buffer = bufnr }
 					vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
-					vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, opts)
+					vim.keymap.set("n", "<leader>ld", vim.lsp.buf.definition, opts)
 					vim.keymap.set("n", "<leader>gr", vim.lsp.buf.references, opts)
 				end,
 			})
