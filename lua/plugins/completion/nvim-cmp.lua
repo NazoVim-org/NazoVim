@@ -100,7 +100,6 @@ return {
 					end
 				end,
 			}),
-
 			sources = {
 				{ name = "copilot", priority = 1050 },
 				{ name = "luasnip", priority = 1000 },
