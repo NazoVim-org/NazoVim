@@ -8,6 +8,7 @@ return {
 			excluded_lsp_clients = {
 				"eslint",
 				"ts_ls",
+				"typescript-tools",
 			},
 		})
 	end,

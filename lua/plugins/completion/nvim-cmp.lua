@@ -101,14 +101,30 @@ return {
 					end
 				end,
 			}),
-			sources = {
-				{ name = "denippet", priority = 1100 },
-				{ name = "copilot", priority = 1050 },
-				{ name = "luasnip", priority = 1000 },
-				{ name = "nvim_lsp", priority = 900 },
-				{ name = "path", priority = 500 },
-				{ name = "buffer", priority = 250 },
-			},
+			sources = (function()
+				local ft = vim.bo.filetype
+				local is_ts = ft == "typescript"
+					or ft == "typescriptreact"
+					or ft == "javascript"
+					or ft == "javascriptreact"
+				if is_ts then
+					return {
+						{ name = "copilot", priority = 1050 },
+						{ name = "luasnip", priority = 1000 },
+						{ name = "nvim_lsp", priority = 900 },
+						{ name = "path", priority = 500 },
+						{ name = "buffer", priority = 250 },
+					}
+				end
+				return {
+					{ name = "denippet", priority = 1100 },
+					{ name = "copilot", priority = 1050 },
+					{ name = "luasnip", priority = 1000 },
+					{ name = "nvim_lsp", priority = 900 },
+					{ name = "path", priority = 500 },
+					{ name = "buffer", priority = 250 },
+				}
+			end)(),
 			experimental = {
 				ghost_text = {
 					hl_group = "CmpGhostSnippet",
