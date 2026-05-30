@@ -14,5 +14,4 @@ return {
 		"Glgrep",
 		"Gedit",
 	},
-	event = "BufReadPre",
 }
