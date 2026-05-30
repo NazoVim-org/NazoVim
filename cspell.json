@@ -42,7 +42,10 @@
     "Keymap",
     "Keymaps",
     "healthcheck",
-    "autocmds"
+    "autocmds",
+    "avante",
+    "Avante",
+    "Repomap"
   ],
   "flagWords": []
 }
