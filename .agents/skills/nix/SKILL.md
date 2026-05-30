@@ -50,7 +50,8 @@ nix develop --command true
 
 ## Version Field
 
-The `version` field in `flake.nix` is updated automatically by `release.yml` during releases. Do not update it manually.
+The `version` field in `flake.nix` is updated automatically by
+`release.yml` during releases. Do not update it manually.
 
 ## Notes
 

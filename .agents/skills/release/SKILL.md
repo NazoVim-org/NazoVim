@@ -39,6 +39,7 @@ git push && git push --tags
 ### 3. Automated (via release.yml)
 
 The `release.yml` workflow triggers on tag push and automatically:
+
 - Updates `flake.nix` version field
 - Updates `flake.lock`
 - Creates GitHub Release with notes from CHANGELOG.md

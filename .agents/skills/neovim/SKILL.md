@@ -36,8 +36,8 @@ lua/
 | `LspAttach`   | LSP-dependent plugins    |
 | `cmd`         | Command-triggered only   |
 
-3. Add to the appropriate category under `lua/plugins/`
-4. Verify startup time: `nvim --startuptime /tmp/startuptime.log`
+1. Add to the appropriate category under `lua/plugins/`
+2. Verify startup time: `nvim --startuptime /tmp/startuptime.log`
 
 ## Key Rules
 
@@ -65,6 +65,7 @@ tail -5 /tmp/startuptime.log
 ## CI Workflow
 
 The `nvim.yml` workflow runs on push to main and PRs:
+
 - Installs plugins via `Lazy! sync`
 - Checks Neovim starts without errors
 - Uploads logs on failure
