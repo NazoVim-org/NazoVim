@@ -118,6 +118,7 @@ nvim/
 
 | プラグイン | 用途 |
 | ---------- | ---- |
+| avante.nvim | CursorライクなAIコーディングエージェント |
 | claudecode.nvim | Claude Code統合 |
 | opencode.nvim | opencode統合 |
 | CopilotChat.nvim | GitHub Copilot Chat |
@@ -204,6 +205,39 @@ nvim/
 | `<Leader>qS` | セッション選択 |
 | `<Leader>ql` | 最後のセッションを復元 |
 | `<Leader>qd` | セッション保存を停止 |
+
+### AI (Avante)
+
+| キー | 動作 |
+| ---- | ---- |
+| `<Leader>aa` | Avanteサイドバー表示 |
+| `<Leader>at` | Avanteサイドバー切替 |
+| `<Leader>an` | 新規質問 |
+| `<Leader>ae` | 選択ブロック編集 |
+| `<Leader>ar` | サイドバー更新 |
+| `<Leader>af` | サイドバーフォーカス |
+| `<Leader>a?` | モデル選択 |
+| `<Leader>as` | 候補表示切替 |
+| `<Leader>aS` | リクエスト停止 |
+| `<Leader>ah` | チャット履歴選択 |
+| `<Leader>ad` | デバッグモード切替 |
+| `<Leader>aR` | Repomap切替 |
+| `<Leader>ac` | 現在のバッファを追加 |
+| `<Leader>aB` | 全バッファを追加 |
+
+### AI (Claude Code)
+
+| キー | 動作 |
+| ---- | ---- |
+| `<Leader>Cc` | Claude切替 |
+| `<Leader>Cf` | Claudeフォーカス |
+| `<Leader>Cr` | Claude再開 |
+| `<Leader>CC` | Claude継続 |
+| `<Leader>Cm` | モデル選択 |
+| `<Leader>Cb` | 現在のバッファを追加 |
+| `<Leader>Cs` | Claudeに送信 (Visual) |
+| `<Leader>Ca` | 差分承認 |
+| `<Leader>Cd` | 差分拒否 |
 
 ### Trouble（診断一覧）
 
