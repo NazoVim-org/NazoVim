@@ -165,7 +165,7 @@ nvim/
 | `gd` | 定義へ移動 (Lspsaga) |
 | `ga` | コードアクション (Lspsaga) |
 | `<Leader>ca` | コードアクション (preview) |
-| `<Leader>gd` | 定義へ移動 (vim.lsp) |
+| `<Leader>ld` | 定義へ移動 (vim.lsp) |
 | `<Leader>gr` | 参照一覧 |
 | `<Leader>oi` | Import整理 (TS) |
 | `<Leader>ru` | 未使用削除 (TS) |

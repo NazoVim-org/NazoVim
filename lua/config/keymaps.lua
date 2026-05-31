@@ -4,9 +4,6 @@ local map = vim.keymap.set
 map("n", "<leader>h", ":nohlsearch<CR>", { desc = "Clear search highlight" })
 map("n", "<leader>t", ":ToggleTerm<CR>", { desc = "Toggle terminal" })
 map("n", "<leader>so", ":AerialToggle!<CR>", { desc = "Toggle Aerial" })
-map("n", "<F2>", function()
-	require("snacks").zen.toggle()
-end, { desc = "Toggle Zen Mode" })
 map("n", "<leader>e", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Toggle Trouble" })
 
 -- LSP (Lspsaga / Actions)
