@@ -31,12 +31,10 @@
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazovim";
             version = "1.0.0";
-            src = ./.;
-            # .git は不要なので除外
+            src = pkgs.lib.cleanSource ./.;
             installPhase = ''
               mkdir -p $out
               cp -r . $out/
-              rm -rf $out/.git
             '';
           };
 

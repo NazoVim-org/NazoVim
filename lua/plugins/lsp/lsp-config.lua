@@ -15,7 +15,6 @@ return {
 				"solargraph",
 				"clangd",
 			},
-			automatic_enable = true,
 		},
 	},
 	{
@@ -57,7 +56,7 @@ return {
 
 			vim.lsp.config("clangd", { capabilities = capabilities })
 
-			vim.lsp.enable({ "nixd" })
+			vim.lsp.enable({ "html", "lua_ls", "solargraph", "nixd", "clangd" })
 		end,
 	},
 }
