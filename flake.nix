@@ -56,16 +56,19 @@
               CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
               DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
               export NVIM_APPNAME="$APPNAME"
-              # 毎回 config を削除して再作成
-              echo "[nazozokc.nvim] Refreshing config at $CONFIG_DIR ..."
-              if [ -d "$CONFIG_DIR" ]; then
+              # symlink なら既存チェック不要、存在すれば上書き
+              if [ -L "$CONFIG_DIR" ]; then
+                rm "$CONFIG_DIR"
+              elif [ -d "$CONFIG_DIR" ]; then
                 rm -rf "$CONFIG_DIR"
               fi
-              mkdir -p "$CONFIG_DIR"
-              cp -r ${nvimConfig}/. "$CONFIG_DIR/"
-              chmod -R u+w "$CONFIG_DIR"
+              ln -s ${nvimConfig} "$CONFIG_DIR"
               # lazy.nvim のデータディレクトリを事前に作成
               mkdir -p "$DATA_DIR"
+              # 初回起動時に Nix store の lockfile を data dir にコピー
+              if [ ! -f "$DATA_DIR/lazy-lock.json" ] && [ -f "$CONFIG_DIR/lazy-lock.json" ]; then
+                cp "$CONFIG_DIR/lazy-lock.json" "$DATA_DIR/lazy-lock.json"
+              fi
               exec nvim "$@"
             '';
           };
