@@ -4,7 +4,7 @@ return {
 	config = function()
 		require("template").setup({
 			temp_dir = vim.fn.stdpath("config") .. "/template",
-			author = "nazozo",
+			author = "nazozokc",
 		})
 	end,
 }

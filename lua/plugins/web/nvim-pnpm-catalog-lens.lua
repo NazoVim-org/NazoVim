@@ -1,4 +1,4 @@
 return {
-	"https://github.com/ryoppippi/nvim-pnpm-catalog-lens",
+	"ryoppippi/nvim-pnpm-catalog-lens",
 	ft = { "json" },
 }

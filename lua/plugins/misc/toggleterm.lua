@@ -1,6 +1,5 @@
 return {
 	"akinsho/toggleterm.nvim",
-	event = "VeryLazy",
 	cmd = "Toggleterm",
 	version = "*",
 	config = function()
