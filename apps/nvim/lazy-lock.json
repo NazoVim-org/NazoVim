@@ -459,10 +459,6 @@
     "branch": "master",
     "commit": "4af8640d9d706447e78c13150ef7475ea2c16b30"
   },
-  "spring-boot.nvim": {
-    "branch": "main",
-    "commit": "218c0c26c14d99feca778e4d13f5ec3e8b1b60f0"
-  },
   "substitute.nvim": {
     "branch": "main",
     "commit": "0d2077398552f069abccbd964a26dd7cd26882cd"

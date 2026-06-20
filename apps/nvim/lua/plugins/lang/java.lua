@@ -12,7 +12,7 @@ return {
 			lombok = { enable = true },
 			java_test = { enable = true },
 			java_debug_adapter = { enable = true },
-			spring_boot_tools = { enable = true },
+			spring_boot_tools = { enable = false },
 			jdk = { auto_install = true, version = "17" },
 		})
 	end,
