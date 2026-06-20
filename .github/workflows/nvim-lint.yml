@@ -3,12 +3,12 @@ on:
   pull_request:
     paths:
       - "**/*.lua"
-      - "init.lua"
+      - "apps/nvim/init.lua"
       - ".github/workflows/nvim-lint.yml"
   push:
     paths:
       - "**/*.lua"
-      - "init.lua"
+      - "apps/nvim/init.lua"
       - ".github/workflows/nvim-lint.yml"
 
 concurrency:
@@ -29,7 +29,7 @@ jobs:
 
       - name: StyLua auto-fix
         run: |
-          nix shell nixpkgs#stylua --command stylua lua/ init.lua
+          nix shell nixpkgs#stylua --command stylua apps/nvim/lua/ apps/nvim/init.lua
 
       - name: Check for StyLua diff (PR)
         if: github.event_name == 'pull_request'
@@ -53,4 +53,4 @@ jobs:
       - name: luacheck
         run: |
           nix shell nixpkgs#lua54Packages.luacheck --command \
-            luacheck lua/ init.lua --globals vim; code=$?; [ $code -lt 2 ]
+            luacheck apps/nvim/lua/ apps/nvim/init.lua --globals vim; code=$?; [ $code -lt 2 ]

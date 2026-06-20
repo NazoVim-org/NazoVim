@@ -5,12 +5,16 @@ on:
     paths:
       - "flake.nix"
       - "flake.lock"
+      - "apps/nvim/**"
+      - "packages/nix/**"
       - ".github/workflows/nix-flake.yml"
   push:
     branches: [main]
     paths:
       - "flake.nix"
       - "flake.lock"
+      - "apps/nvim/**"
+      - "packages/nix/**"
       - ".github/workflows/nix-flake.yml"
   workflow_dispatch:
 

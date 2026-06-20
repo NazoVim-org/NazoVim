@@ -20,22 +20,26 @@ lazy.nvim をプラグインマネージャーとして使用しています。
 ## ディレクトリ構成
 
 ```text
-nvim/
-├── init.lua              # エントリーポイント・lazy.nvim bootstrap
-├── lazy-lock.json        # プラグインバージョンロック
-├── lua/
-│   ├── config/
-│   │   ├── options.lua   # 基本設定 (vim.opt)
-│   │   ├── keymaps.lua   # グローバルキーマップ
-│   │   └── autocmds.lua  # オートコマンド
-│   ├── plugins.lua       # プラグインカテゴリの import 定義
-│   └── plugins/          # プラグイン設定（カテゴリ別サブディレクトリ）
-└── template/             # ファイルテンプレート
-    ├── js/
-    ├── lua/
-    ├── md/
-    ├── project/
-    └── ts/
+.
+├── apps/
+│   └── nvim/                 # Neovim configuration
+│       ├── init.lua          # エントリーポイント・lazy.nvim bootstrap
+│       ├── lazy-lock.json    # プラグインバージョンロック
+│       └── lua/
+│           ├── config/       # options / keymaps / autocmds
+│           ├── plugins.lua   # プラグインカテゴリの import 定義
+│           └── plugins/      # プラグイン設定（カテゴリ別サブディレクトリ）
+├── packages/
+│   └── nix/                  # Nix modules
+├── template/                 # ファイルテンプレート
+│   ├── js/
+│   ├── lua/
+│   ├── md/
+│   ├── project/
+│   └── ts/
+├── flake.nix                 # Nix flake (nix run / nix develop)
+├── docs/
+└── .github/
 ```
 
 ---
@@ -331,7 +335,11 @@ nvim/
 このリポジトリをクローンし、`~/.config/nvim` にシンボリックリンクを貼って使用します。
 
 ```bash
-git clone https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+cd ~/.config/nvim
+git sparse-checkout set apps/nvim
+mv apps/nvim/* . && rm -rf apps
 ```
 
 または、直接このディレクトリを `~/.config/nvim` に配置してください。
