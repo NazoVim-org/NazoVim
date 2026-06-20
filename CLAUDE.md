@@ -20,22 +20,26 @@ lazy.nvim をプラグインマネージャーとして使用しています。
 ## ディレクトリ構成
 
 ```text
-nvim/
-├── init.lua              # エントリーポイント・lazy.nvim bootstrap
-├── lazy-lock.json        # プラグインバージョンロック
-├── lua/
-│   ├── config/
-│   │   ├── options.lua   # 基本設定 (vim.opt)
-│   │   ├── keymaps.lua   # グローバルキーマップ
-│   │   └── autocmds.lua  # オートコマンド
-│   ├── plugins.lua       # プラグインカテゴリの import 定義
-│   └── plugins/          # プラグイン設定（カテゴリ別サブディレクトリ）
-└── template/             # ファイルテンプレート
-    ├── js/
-    ├── lua/
-    ├── md/
-    ├── project/
-    └── ts/
+.
+├── apps/
+│   └── nvim/                 # Neovim configuration
+│       ├── init.lua          # エントリーポイント・lazy.nvim bootstrap
+│       ├── lazy-lock.json    # プラグインバージョンロック
+│       └── lua/
+│           ├── config/       # options / keymaps / autocmds
+│           ├── plugins.lua   # プラグインカテゴリの import 定義
+│           └── plugins/      # プラグイン設定（カテゴリ別サブディレクトリ）
+├── packages/
+│   └── nix/                  # Nix modules
+├── template/                 # ファイルテンプレート
+│   ├── js/
+│   ├── lua/
+│   ├── md/
+│   ├── project/
+│   └── ts/
+├── flake.nix                 # Nix flake (nix run / nix develop)
+├── docs/
+└── .github/
 ```
 
 ---

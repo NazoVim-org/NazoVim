@@ -86,27 +86,19 @@ nix run github:NazoVim-org/NazoVim
 ### 方法2: Clone（Nix 不要）
 
 > **注意**: 既存の Neovim 設定を上書きします。バックアップを推奨します。
->
-> ```bash
-> mv ~/.config/nvim ~/.config/nvim.backup  # バックアップ（任意）
-> ```
 
 ```bash
-git clone https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+# 任意の場所に clone
+git clone https://github.com/NazoVim-org/NazoVim.git ~/nazovim
+# apps/nvim/ を Neovim の config として symlink
+ln -sf ~/nazovim/apps/nvim ~/.config/nvim
 nvim
 ```
 
 初回起動時に lazy.nvim がすべてのプラグインを自動インストールします。
 
-### 方法2でクローン後に削除しても良いファイル
-
-- document/
-- LICENSE
-- SECURITY.md
-- CONTRIBUTING.md
-
-> `flake.nix` と `.github/` は CI に必要です。
-> PRを送る予定がない場合は `.github/` のみ削除しても構いません。
+> または `NVIM_APPNAME=nvim-nazozokc` を使うと、
+> `~/nazovim/apps/nvim` を `~/.config/nvim-nazozokc` に symlink して隔離使用できます。
 
 ---
 
@@ -114,22 +106,25 @@ nvim
 
 ```text
 .
-├── flake.nix             # Nix flake (nix run / nix develop)
-├── init.lua              # エントリーポイント・キーマップ定義
-├── lazy-lock.json        # プラグンバージョンロック
-├── lua/
-│   ├── vim-options.lua   # 基本vim設定
-│   ├── plugins.lua       # lazy.nvim エントリ (空 = plugins/ 以下を自動読み込み)
-│   └── plugins/          # プラグイン設定 (1ファイル1プラグイン)
-├── template/             # ファイルテンプレート
+├── apps/
+│   └── nvim/                 # 🎯 Neovim configuration (entry point)
+│       ├── init.lua          # lazy.nvim bootstrap
+│       ├── lazy-lock.json    # プラグインバージョンロック
+│       └── lua/
+│           ├── config/       # options / keymaps / autocmds
+│           ├── plugins.lua   # プラグインカテゴリの import 定義
+│           └── plugins/      # プラグイン設定
+├── packages/
+│   └── nix/                  # Nix modules
+├── template/                 # ファイルテンプレート
 │   ├── js/
 │   ├── ts/
 │   ├── lua/
 │   ├── md/
 │   └── project/
-└── .github/
-    ├── workflows/        # CI (nvim startup check / auto-merge)
-    └── ISSUE_TEMPLATE/   # Bug report / Feature request / Plugin proposal
+├── docs/                     # ドキュメント
+├── flake.nix                 # Nix flake (nix run / nix develop)
+└── .github/                  # CI workflows / issue templates
 ```
 
 ---

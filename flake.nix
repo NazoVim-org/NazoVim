@@ -1,6 +1,14 @@
 {
   description = "NazoVim-org's Neovim configuration";
 
+  # ============================================================
+  # monorepo structure:
+  #   apps/nvim/       — Neovim configuration (init.lua, lua/, lazy-lock.json)
+  #   packages/nix/    — Nix modules and package definitions
+  #   template/        — File templates for new projects
+  #   docs/            — Documentation
+  # ============================================================
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
@@ -27,11 +35,11 @@
               hash = "sha256-uWhrGAwQ2nnAkyJ46qGkYxJ5K1jtyUIQOAVu3yTlquk=";
             };
           });
-          # このリポジトリの設定ファイルを Nix store にコピー
+          # apps/nvim/ 以下の設定ファイルを Nix store にコピー
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazovim";
             version = "1.0.0";
-            src = pkgs.lib.cleanSource ./.;
+            src = pkgs.lib.cleanSource ./apps/nvim;
             installPhase = ''
               mkdir -p $out
               cp -r . $out/
