@@ -88,17 +88,19 @@ nix run github:NazoVim-org/NazoVim
 > **注意**: 既存の Neovim 設定を上書きします。バックアップを推奨します。
 
 ```bash
-# 任意の場所に clone
-git clone https://github.com/NazoVim-org/NazoVim.git ~/nazovim
-# apps/nvim/ を Neovim の config として symlink
-ln -sf ~/nazovim/apps/nvim ~/.config/nvim
+# Sparse checkout — `apps/nvim/` だけをダウンロード
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+cd ~/.config/nvim
+git sparse-checkout set apps/nvim
+mv apps/nvim/* . && rm -rf apps
 nvim
 ```
 
 初回起動時に lazy.nvim がすべてのプラグインを自動インストールします。
 
-> または `NVIM_APPNAME=nvim-nazozokc` を使うと、
-> `~/nazovim/apps/nvim` を `~/.config/nvim-nazozokc` に symlink して隔離使用できます。
+> monorepo 構成のため、Neovim 設定は `apps/nvim/` にあります。
+> 上記の sparse checkout でリポジトリ全体を clone せずに `apps/nvim/` だけ取得できます。
 
 ---
 

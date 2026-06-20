@@ -40,8 +40,12 @@ cd NazoVim
 nix develop
 nvim
 
-# Nix なしの場合
-git clone https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+# Nix なしの場合（sparse checkout で apps/nvim/ のみ取得）
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+cd ~/.config/nvim
+git sparse-checkout set apps/nvim
+mv apps/nvim/* . && rm -rf apps
 nvim
 ```
 
@@ -54,19 +58,19 @@ nvim
 - ローカルで確認したい場合:
 
 ```bash
-nix shell nixpkgs#stylua --command stylua lua/ init.lua
+nix shell nixpkgs#stylua --command stylua apps/nvim/lua/ apps/nvim/init.lua
 ```
 
 ---
 
 ## 🔌 プラグインを追加・変更するとき
 
-- プラグイン設定は `lua/plugins/<カテゴリ>/` 以下に 1 ファイル 1 プラグインで追加
+- プラグイン設定は `apps/nvim/lua/plugins/<カテゴリ>/` 以下に 1 ファイル 1 プラグインで追加
 - lazy.nvim の仕様に従い、できる限り **遅延ロード** (`event`, `ft`, `cmd`, `keys`) を指定してください
 - 既存プラグインと重複・競合がないか確認してください（特に LSP 系・フォーマッター系）
 
 ```text
-lua/plugins/
+apps/nvim/lua/plugins/
 ├── ai/          # AI 統合
 ├── completion/  # 補完
 ├── dap/         # デバッグ

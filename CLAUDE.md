@@ -335,7 +335,11 @@ lazy.nvim をプラグインマネージャーとして使用しています。
 このリポジトリをクローンし、`~/.config/nvim` にシンボリックリンクを貼って使用します。
 
 ```bash
-git clone https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+cd ~/.config/nvim
+git sparse-checkout set apps/nvim
+mv apps/nvim/* . && rm -rf apps
 ```
 
 または、直接このディレクトリを `~/.config/nvim` に配置してください。

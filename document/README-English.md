@@ -93,27 +93,21 @@ The configuration is deployed in isolation under `~/.config/nvim-nazozokc`, leav
 <!-- markdownlint-disable MD013 -->
 > **Warning**: This will overwrite your existing Neovim configuration. A backup is recommended.
 <!-- markdownlint-enable MD013 -->
->
-> ```bash
-> mv ~/.config/nvim ~/.config/nvim.backup  # backup (optional)
-> ```
 
 ```bash
-git clone https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+# Sparse checkout — only downloads apps/nvim/
+git clone --depth 1 --filter=blob:none --sparse \
+  https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
+cd ~/.config/nvim
+git sparse-checkout set apps/nvim
+mv apps/nvim/* . && rm -rf apps
 nvim
 ```
 
 On first launch, lazy.nvim will automatically install all plugins.
 
-### Files safe to delete after cloning (Option 2)
-
-- document/
-- LICENSE
-- SECURITY.md
-- CONTRIBUTING.md
-
-> `flake.nix` and `.github/` are required for CI.
-> If you don't plan to submit PRs, you may delete only `.github/`.
+> For development, clone the full repository instead:
+> `git clone https://github.com/NazoVim-org/NazoVim.git`
 
 ---
 
@@ -121,22 +115,25 @@ On first launch, lazy.nvim will automatically install all plugins.
 
 ```text
 .
-├── flake.nix             # Nix flake (nix run / nix develop)
-├── init.lua              # Entry point & keymap definitions
-├── lazy-lock.json        # Plugin version lock
-├── lua/
-│   ├── vim-options.lua   # Core vim settings
-│   ├── plugins.lua       # lazy.nvim entry (empty = auto-loads plugins/ directory)
-│   └── plugins/          # Plugin configs (one file per plugin)
-├── template/             # File templates
+├── apps/
+│   └── nvim/                 # 🎯 Neovim configuration (entry point)
+│       ├── init.lua          # lazy.nvim bootstrap
+│       ├── lazy-lock.json    # Plugin version lock
+│       └── lua/
+│           ├── config/       # options / keymaps / autocmds
+│           ├── plugins.lua   # Plugin category imports
+│           └── plugins/      # Plugin configs (one file per plugin)
+├── packages/
+│   └── nix/                  # Nix modules
+├── template/                 # File templates
 │   ├── js/
 │   ├── ts/
 │   ├── lua/
 │   ├── md/
 │   └── project/
-└── .github/
-    ├── workflows/        # CI (nvim startup check / auto-merge)
-    └── ISSUE_TEMPLATE/   # Bug report / Feature request / Plugin proposal
+├── flake.nix                 # Nix flake (nix run / nix develop)
+├── docs/
+└── .github/                  # CI workflows / issue templates
 ```
 
 ---
