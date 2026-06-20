@@ -39,20 +39,34 @@ jobs:
           echo "NVIM_APPNAME=$NVIM_APPNAME" >> "$GITHUB_ENV"
           echo "CONFIG_DIR=$CONFIG_DIR" >> "$GITHUB_ENV"
 
+      # swagger-preview.nvim の build (npm install -g) が Nix 環境で
+      # EACCES を起こさないよう、npm global prefix を書き込み可能な場所に設定する
+      - name: Set up writable npm global prefix
+        run: |
+          mkdir -p /tmp/npm-global
+          npm config set prefix /tmp/npm-global
+          echo "/tmp/npm-global/bin" >> "$GITHUB_PATH"
+
       - name: Install lazy.nvim plugins
         timeout-minutes: 10
+        env:
+          NPM_CONFIG_PREFIX: /tmp/npm-global
         run: |
           nix develop --command sh -c '
             export NVIM_APPNAME="nvim-nazozokc"
+            export NPM_CONFIG_PREFIX=/tmp/npm-global
             nvim --headless "+Lazy! sync" +q 2>&1 | tee /tmp/lazy-sync.log
             echo "--- lazy sync log ---"
             cat /tmp/lazy-sync.log
           '
 
       - name: Check Neovim startup (no errors)
+        env:
+          NPM_CONFIG_PREFIX: /tmp/npm-global
         run: |
           nix develop --command sh -c '
             export NVIM_APPNAME="nvim-nazozokc"
+            export NPM_CONFIG_PREFIX=/tmp/npm-global
 
             # --startuptime でタイム計測しつつ headless 起動
             nvim --headless \
