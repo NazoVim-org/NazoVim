@@ -18,7 +18,7 @@ jobs:
         uses: DeterminateSystems/nix-installer-action@v22
 
       - name: Cache Nix store
-        uses: DeterminateSystems/magic-nix-cache-action@v14
+        uses: DeterminateSystems/magic-nix-cache-action@v15
 
       # lazy.nvim プラグインのキャッシュ
       - name: Cache lazy.nvim plugins
