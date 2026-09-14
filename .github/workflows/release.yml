@@ -23,7 +23,7 @@ jobs:
           sed -i "s/version = \".*\"/version = \"${{ steps.version.outputs.VERSION }}\"/" flake.nix
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v22
+        uses: DeterminateSystems/nix-installer-action@v23
 
       - name: Cache Nix store
         uses: DeterminateSystems/magic-nix-cache-action@v14
