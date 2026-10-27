@@ -150,7 +150,9 @@ local function normalize(raw, ctx, is_dep, source)
 		spec.lazy = ctx.defaults.lazy == nil and DEFAULT_LAZY or ctx.defaults.lazy
 	end
 	spec.priority = spec.priority or ctx.defaults.priority or DEFAULT_PRIORITY
-	spec.enabled = spec.enabled ~= false
+	if spec.enabled == nil then
+		spec.enabled = true
+	end
 
 	if spec.cmd ~= nil then
 		spec.cmd = as_list(spec.cmd)
@@ -210,6 +212,9 @@ local function merge_specs(existing, incoming)
 		"branch",
 		"version",
 		"commit",
+		"tag",
+		"pin",
+		"cond",
 		"build",
 		"main",
 		"url",
@@ -372,6 +377,29 @@ function M.modules(spec)
 	return spec._.modules
 end
 
+function M.is_enabled(spec)
+	if not spec or spec.enabled == false then
+		return false
+	end
+	if type(spec.enabled) == "function" then
+		local ok, enabled = pcall(spec.enabled, spec)
+		if not ok or enabled == false then
+			return false
+		end
+	end
+	if spec.cond ~= nil then
+		if type(spec.cond) == "function" then
+			local ok, cond = pcall(spec.cond, spec)
+			if not ok or cond == false then
+				return false
+			end
+		elseif spec.cond == false then
+			return false
+		end
+	end
+	return true
+end
+
 function M.resolve_main(spec)
 	if spec.main ~= nil then
 		return spec.main or nil
@@ -407,6 +435,21 @@ function M.validate(spec)
 	end
 	if spec.version ~= nil and spec.branch ~= nil then
 		warnings[#warnings + 1] = "both version and branch are set"
+	end
+	if spec.tag ~= nil and spec.version ~= nil then
+		warnings[#warnings + 1] = "both tag and version are set"
+	end
+	if spec.tag ~= nil and (type(spec.tag) ~= "string" or spec.tag == "") then
+		errors[#errors + 1] = "invalid tag: " .. tostring(spec.tag)
+	end
+	if spec.pin ~= nil and type(spec.pin) ~= "boolean" then
+		errors[#errors + 1] = "invalid pin: " .. tostring(spec.pin)
+	end
+	if spec.cond ~= nil and type(spec.cond) ~= "boolean" and type(spec.cond) ~= "function" then
+		errors[#errors + 1] = "invalid cond: " .. tostring(spec.cond)
+	end
+	if spec.enabled ~= nil and type(spec.enabled) ~= "boolean" and type(spec.enabled) ~= "function" then
+		errors[#errors + 1] = "invalid enabled: " .. tostring(spec.enabled)
 	end
 	for _, cmd in ipairs(spec.cmd or {}) do
 		if type(cmd) ~= "string" or cmd == "" then

@@ -51,14 +51,16 @@
 
 `:NazoPlug` で操作します。設定は `apps/nvim/nazoplug-lock.json`、実行時データは
 `stdpath("data")/site/pack/nazoplug/opt` と `stdpath("data")/nazoplug-lock.json` です。
+spec は lazy.nvim 互換で、`tag` / `pin` / `cond` / 関数形式の `enabled` に対応します。
 
 ```vim
 :NazoPlug sync      " lock に合わせて導入・復元
 :NazoPlug install   " 未導入プラグインを導入
 :NazoPlug update    " 全プラグインを更新
 :NazoPlug check     " 導入状態と lock の差分を確認
+:NazoPlug status    " プラグイン状態と lock の差分を表示
 :NazoPlug restore   " lock の commit に復元
-:NazoPlug clean     " lock から外れたプラグインを削除
+:NazoPlug clean     " spec/lock から外れたプラグインを削除
 :NazoPlug migrate   " 既存 lazy.nvim データを移行
 :NazoPlug build     " build hook を実行
 ```

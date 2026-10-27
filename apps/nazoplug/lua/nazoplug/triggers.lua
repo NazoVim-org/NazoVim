@@ -1,4 +1,5 @@
 local U = require("nazoplug.util")
+local S = require("nazoplug.spec")
 
 local M = {}
 
@@ -13,7 +14,7 @@ local event_mappings = {
 event_mappings["User VeryLazy"] = event_mappings.VeryLazy
 
 local function load_spec(spec, reason)
-	if spec._.loaded or spec.enabled == false then
+	if spec._.loaded or not S.is_enabled(spec) then
 		return
 	end
 	if M.loader then
@@ -318,7 +319,7 @@ function M.setup(specs, opts)
 	M.loading = {}
 	M.very_lazy_scheduled = false
 	for _, spec in ipairs(specs) do
-		if spec.enabled ~= false then
+		if S.is_enabled(spec) then
 			for _, value in ipairs(spec.event or {}) do
 				add_event_spec(spec, value)
 			end

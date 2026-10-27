@@ -354,7 +354,8 @@ nvim
 :NazoPlug install   " 未導入プラグインを導入
 :NazoPlug restore   " lock の commit に復元
 :NazoPlug check     " 導入状態と lock の差分を確認
-:NazoPlug clean     " lock から外れたプラグインを削除
+:NazoPlug status    " プラグイン状態と lock の差分を表示
+:NazoPlug clean     " spec/lock から外れたプラグインを削除
 :NazoPlug migrate   " 既存 lazy.nvim データを移行
 :NazoPlug build     " build hook を実行
 ```

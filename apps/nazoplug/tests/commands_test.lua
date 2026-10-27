@@ -52,6 +52,7 @@ test("commands registers NazoPlug and handles empty state", function()
 	})
 	eq(vim.fn.exists(":NazoPlug"), 2)
 	eq(C.dispatch({ "check" }), true)
+	eq(C.dispatch({ "status" }), true)
 	C.dispatch({ "install" })
 	C.dispatch({ "update" })
 	C.dispatch({ "build" })
@@ -87,6 +88,38 @@ test("commands install selected plugin with its dependencies", function()
 	vim.fn.delete(by_name["command-child.nvim"].dir, "rf")
 	eq(C.dispatch({ "install", "command-parent.nvim" }), true)
 	truthy(U.is_dir(by_name["command-child.nvim"].dir))
+end)
+
+test("commands clean removes orphan directories", function()
+	local pack_dir = U.join(tmp, "clean-pack")
+	local orphan = U.join(pack_dir, "orphan.nvim")
+	truthy(U.mkdir(orphan))
+	C.setup({
+		specs = {},
+		by_name = {},
+		lock = {},
+		lock_path = U.join(tmp, "clean-lock.json"),
+		pack_dir = pack_dir,
+		old_pack_dir = U.join(tmp, "clean-old"),
+	})
+	eq(C.dispatch({ "clean", "--yes" }), true)
+	eq(U.exists(orphan), false)
+end)
+
+test("commands migrate refreshes the in-memory lock", function()
+	local lock_path = U.join(tmp, "migrate-state-lock.json")
+	local commit = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	truthy(U.write_file(lock_path, string.format('{"migrated.nvim":{"commit":"%s"}}\n', commit)))
+	C.setup({
+		specs = {},
+		by_name = {},
+		lock = {},
+		lock_path = lock_path,
+		pack_dir = U.join(tmp, "migrate-state-pack"),
+		old_pack_dir = U.join(tmp, "migrate-state-old"),
+	})
+	eq(C.dispatch({ "migrate" }), true)
+	eq(C.state().lock["migrated.nvim"].commit, commit)
 end)
 
 test("health check runs with empty state", function()

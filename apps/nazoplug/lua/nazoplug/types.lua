@@ -16,10 +16,13 @@
 ---@field build string|fun(spec: NazoSpec)|(string|fun(spec: NazoSpec))[]?
 ---@field branch string?
 ---@field version string|boolean?
+---@field tag string?
+---@field pin boolean?
 ---@field commit string?
 ---@field submodules boolean?
 ---@field main string?
----@field enabled boolean?
+---@field enabled boolean|fun(spec: NazoSpec): boolean?
+---@field cond boolean|fun(spec: NazoSpec): boolean?
 ---@field dev boolean?
 ---@field _ table?
 return {}

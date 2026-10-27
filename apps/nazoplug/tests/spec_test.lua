@@ -56,6 +56,31 @@ test("spec collects shorthand and resolves dir", function()
 	truthy(by_name["plenary.nvim"])
 end)
 
+test("spec preserves conditional enabled and cond", function()
+	local enabled = function()
+		return false
+	end
+	local _, by_name = S.collect({
+		{ "owner/conditional.nvim", enabled = enabled, cond = false },
+	}, { pack_dir = pack_dir })
+	local spec = by_name["conditional.nvim"]
+	eq(spec.enabled, enabled)
+	eq(S.is_enabled(spec), false)
+	spec.enabled = true
+	eq(S.is_enabled(spec), false)
+	spec.cond = true
+	eq(S.is_enabled(spec), true)
+end)
+
+test("spec preserves exact tag and pin", function()
+	local _, by_name = S.collect({
+		{ "owner/tagged.nvim", tag = "v1.0.0", pin = true },
+	}, { pack_dir = pack_dir })
+	local spec = by_name["tagged.nvim"]
+	eq(spec.tag, "v1.0.0")
+	eq(spec.pin, true)
+end)
+
 test("spec merges dependency tables and opts", function()
 	local specs, by_name = S.collect({
 		{

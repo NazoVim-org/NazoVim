@@ -126,8 +126,11 @@ function M.load(spec, reason)
 	if type(spec) == "string" then
 		spec = M.by_name[spec]
 	end
-	if not spec or spec._.loaded or spec.enabled == false then
+	if not spec or spec._.loaded then
 		return spec and spec._.loaded or false
+	end
+	if not S.is_enabled(spec) then
+		return false
 	end
 	if not spec._.installed then
 		spec._.installed = U.is_dir(spec.dir)
@@ -164,7 +167,7 @@ end
 function M.get_start_specs(specs)
 	local start = {}
 	for _, spec in ipairs(specs) do
-		if not spec._.loaded and spec.enabled ~= false and (spec._.rtp_loaded or spec.lazy == false) then
+		if not spec._.loaded and S.is_enabled(spec) and (spec._.rtp_loaded or spec.lazy == false) then
 			start[#start + 1] = spec
 		end
 	end

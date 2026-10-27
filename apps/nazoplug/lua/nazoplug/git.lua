@@ -138,6 +138,14 @@ function M.fetch(dir, opts)
 	return result ~= nil, err
 end
 
+function M.has_commit(dir, commit)
+	if not commit or commit == "" then
+		return false
+	end
+	local result = M.run({ "cat-file", "-e", commit .. "^{commit}" }, { cwd = dir, timeout = 15000 })
+	return result ~= nil
+end
+
 function M.fetch_tag(dir, tag, opts)
 	opts = opts or {}
 	local result, err = M.run({ "fetch", "--force", "--tags", "origin", "refs/tags/" .. tag .. ":refs/tags/" .. tag }, {
@@ -269,9 +277,46 @@ function M.resolve_version(dir, version, opts)
 	return nil, err or ("no tag matches version " .. tostring(version))
 end
 
+function M.resolve_tag(dir, tag, opts)
+	opts = opts or {}
+	if type(tag) ~= "string" or tag == "" then
+		return nil, "invalid tag"
+	end
+	if M.is_repo(dir) then
+		local tags, err = M.tags(dir)
+		if not tags then
+			return nil, err
+		end
+		if vim.tbl_contains(tags, tag) then
+			return tag, nil, false
+		end
+	end
+	if opts.url and not opts.remote_checked then
+		local remote_tags, remote_err = M.remote_tags(opts.url, { refresh = true })
+		if remote_tags then
+			if vim.tbl_contains(remote_tags, tag) then
+				return tag, nil, true
+			end
+			return nil, "tag not found: " .. tag
+		end
+		return nil, remote_err or ("tag not found: " .. tag)
+	end
+	return nil, "tag not found: " .. tag
+end
+
 function M.resolve_ref(spec)
 	if spec.commit then
 		return { ref = spec.commit, kind = "commit" }
+	end
+	if spec.tag ~= nil then
+		local tag, err, needs_fetch = M.resolve_tag(spec.dir, spec.tag, {
+			url = spec.url,
+			remote_checked = spec._ and spec._.tag_remote_checked,
+		})
+		if not tag then
+			return nil, err
+		end
+		return { ref = tag, kind = "tag", needs_fetch = needs_fetch }
 	end
 	if spec.version ~= nil and spec.version ~= false then
 		local tag, err, needs_fetch = M.resolve_version(spec.dir, spec.version, {

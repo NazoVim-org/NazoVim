@@ -78,6 +78,23 @@ test("loader sources plugin and runs config once", function()
 	vim.opt.rtp:remove(spec.dir)
 end)
 
+test("loader skips disabled and false cond specs", function()
+	local spec = plugin_spec("conditional.nvim")
+	spec.enabled = false
+	L.setup({ pack_dir = pack_dir, by_name = { [spec.name] = spec } })
+	eq(L.load(spec, {}), false)
+	eq(spec._.loaded, false)
+	spec.enabled = true
+	spec.cond = function()
+		return false
+	end
+	eq(L.load(spec, {}), false)
+	eq(spec._.loaded, false)
+	spec.cond = true
+	truthy(L.load(spec, {}))
+	vim.opt.rtp:remove(spec.dir)
+end)
+
 test("loader loads dependencies before parent config", function()
 	vim.g.loader_test_order = ""
 	local child = plugin_spec("child.nvim")

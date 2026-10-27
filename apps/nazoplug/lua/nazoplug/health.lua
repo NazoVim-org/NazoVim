@@ -1,6 +1,7 @@
 local U = require("nazoplug.util")
 local L = require("nazoplug.lock")
 local G = require("nazoplug.git")
+local S = require("nazoplug.spec")
 
 local M = {}
 
@@ -84,8 +85,11 @@ function M.check()
 	local specs = state.specs or {}
 	local lock = state.lock or {}
 	local missing, mismatched = {}, {}
+	local disabled = {}
 	for _, spec in ipairs(specs) do
-		if not G.is_repo(spec.dir) then
+		if not S.is_enabled(spec) then
+			disabled[#disabled + 1] = spec.name
+		elseif not G.is_repo(spec.dir) then
 			missing[#missing + 1] = spec.name
 		else
 			local entry = lock[spec.name]
@@ -96,6 +100,9 @@ function M.check()
 				end
 			end
 		end
+	end
+	if #disabled > 0 then
+		health.info(string.format("%d disabled plugin spec(s): %s", #disabled, table.concat(disabled, ", ")))
 	end
 	if #missing > 0 then
 		health.warn("missing plugins: " .. table.concat(missing, ", "))

@@ -101,9 +101,9 @@ function M.entry(spec)
 	if not head then
 		return nil, err
 	end
-	local branch = spec.branch or G.current_branch(spec.dir)
-	if not branch then
-		branch = G.default_branch(spec.dir, spec.url)
+	local branch = G.current_branch(spec.dir)
+	if not branch and not spec.tag and not spec.version and not spec.commit then
+		branch = spec.branch or G.default_branch(spec.dir, spec.url)
 	end
 	local entry = { commit = head }
 	if branch and branch ~= "" then
@@ -114,15 +114,51 @@ end
 
 function M.ensure(spec, opts)
 	opts = opts or {}
-	local locked = opts.use_lock and opts.lock and opts.lock[spec.name] or nil
 	if not spec._ then
 		spec._ = {}
 	end
 	local installed = G.is_repo(spec.dir)
-	if installed and opts.update == false and not opts.use_lock and (not spec.build or spec._.build) then
+	local use_lock = spec.pin or opts.use_lock == true or (opts.use_lock == "missing" and not installed)
+	local locked = use_lock and opts.lock and opts.lock[spec.name] or nil
+
+	if installed and opts.update == false and not use_lock then
 		spec._.installed = true
-		return M.entry(spec)
+		local entry, entry_err = M.entry(spec)
+		if not entry then
+			return nil, string.format("failed to read HEAD for %s: %s", spec.name, entry_err)
+		end
+		local built, build_err = M.build(spec, opts)
+		if not built then
+			return entry, build_err
+		end
+		return entry, nil
 	end
+
+	if installed and locked and locked.commit then
+		local head = G.head(spec.dir)
+		local current_branch = G.current_branch(spec.dir)
+		local branch_ok
+		if spec.tag or spec.version or spec.commit then
+			branch_ok = current_branch == nil
+		else
+			local expected_branch = spec.branch or locked.branch
+			branch_ok = not expected_branch or current_branch == expected_branch
+		end
+		if head == locked.commit and branch_ok then
+			spec._.installed = true
+			local entry, entry_err = M.entry(spec)
+			if not entry then
+				return nil, string.format("failed to read HEAD for %s: %s", spec.name, entry_err)
+			end
+			local built, build_err = M.build(spec, opts)
+			if not built then
+				return entry, build_err
+			end
+			return entry, nil
+		end
+	end
+
+	local locked_present = installed and locked and locked.commit and G.has_commit(spec.dir, locked.commit)
 
 	if not installed then
 		if U.exists(spec.dir) then
@@ -132,7 +168,7 @@ function M.ensure(spec, opts)
 			end
 		end
 		local clone_branch = nil
-		if spec.branch and spec.version == nil and spec.commit == nil then
+		if spec.branch and spec.version == nil and spec.commit == nil and spec.tag == nil then
 			clone_branch = spec.branch
 		end
 		local ok, err = G.clone(spec, {
@@ -142,26 +178,34 @@ function M.ensure(spec, opts)
 		if not ok then
 			return nil, string.format("clone failed for %s: %s", spec.name, err)
 		end
-	else
-		if opts.update ~= false and not opts.offline then
-			local ok, err = G.fetch(spec.dir, { timeout = opts.timeout })
-			if not ok then
-				return nil, string.format("fetch failed for %s: %s", spec.name, err)
+		if locked and locked.commit and not G.has_commit(spec.dir, locked.commit) and not opts.offline then
+			local fetched, fetch_err = G.fetch(spec.dir, { timeout = opts.timeout })
+			if not fetched then
+				return nil, string.format("fetch failed for %s: %s", spec.name, fetch_err)
 			end
+		end
+	elseif not opts.offline and not locked_present and (opts.update ~= false or locked) then
+		local ok, err = G.fetch(spec.dir, { timeout = opts.timeout })
+		if not ok then
+			return nil, string.format("fetch failed for %s: %s", spec.name, err)
 		end
 	end
 
+	local checkout_branch = nil
+	if not spec.tag and not spec.version and not spec.commit then
+		checkout_branch = spec.branch or (locked and locked.branch)
+	end
 	local ok, err
 	if locked and locked.commit then
 		ok, err = G.checkout(spec.dir, locked.commit, {
-			branch = spec.branch,
+			branch = checkout_branch,
 			submodules = spec.submodules,
 			timeout = opts.timeout,
 		})
 	else
 		ok, err = G.checkout_spec(spec, {
 			offline = opts.offline,
-			branch = spec.branch,
+			branch = checkout_branch,
 			timeout = opts.timeout,
 		})
 	end
@@ -208,7 +252,7 @@ function M.prefetch(specs, opts)
 			index = index + 1
 			local spec = missing[index]
 			local clone_branch = nil
-			if spec.branch and spec.version == nil and spec.commit == nil then
+			if spec.branch and spec.version == nil and spec.commit == nil and spec.tag == nil then
 				clone_branch = spec.branch
 			end
 			local function finish(result)
@@ -345,10 +389,27 @@ function M.sync(specs, lock, opts)
 end
 
 function M.install_missing(specs, lock, opts)
-	opts = vim.tbl_extend("force", { update = false }, opts or {})
+	opts = vim.tbl_extend("force", { update = false, use_lock = "missing" }, opts or {})
+	local by_name = opts.by_name or {}
 	local missing = {}
-	for _, spec in ipairs(specs) do
+	local checked = {}
+	local function needs_install(spec)
+		if not spec or checked[spec.name] then
+			return false
+		end
+		checked[spec.name] = true
 		if not G.is_repo(spec.dir) then
+			return true
+		end
+		for _, dependency_name in ipairs(spec.dependencies or {}) do
+			if needs_install(by_name[dependency_name]) then
+				return true
+			end
+		end
+		return false
+	end
+	for _, spec in ipairs(specs) do
+		if needs_install(spec) then
 			missing[#missing + 1] = spec
 		end
 	end
@@ -367,8 +428,12 @@ function M.check(spec, lock)
 	if entry and entry.commit and entry.commit ~= head then
 		return false, "commit mismatch"
 	end
-	if spec.branch and G.current_branch(spec.dir) ~= spec.branch then
-		return false, "branch mismatch"
+	if not spec.tag and not spec.version and not spec.commit then
+		local expected_branch = spec.branch or (entry and entry.branch)
+		local current_branch = G.current_branch(spec.dir)
+		if expected_branch and current_branch and current_branch ~= expected_branch then
+			return false, "branch mismatch"
+		end
 	end
 	return true, head
 end

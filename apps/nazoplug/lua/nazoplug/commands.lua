@@ -2,6 +2,7 @@ local U = require("nazoplug.util")
 local L = require("nazoplug.lock")
 local G = require("nazoplug.git")
 local I = require("nazoplug.install")
+local S = require("nazoplug.spec")
 
 local M = {}
 
@@ -122,7 +123,7 @@ local function cmd_install(args)
 		notify("all plugins are installed")
 		return true
 	end
-	return run_install(specs, { update = false })
+	return run_install(specs, { update = false, use_lock = "missing" })
 end
 
 local function cmd_update(args)
@@ -144,11 +145,14 @@ local function cmd_update(args)
 	return run_install(installed, { update = true, offline = vim.tbl_contains(args, "--offline") })
 end
 
-local function cmd_check()
-	local lock = state.lock
-	local missing, mismatched, ok = {}, {}, 0
-	for _, spec in ipairs(state.specs) do
-		if not G.is_repo(spec.dir) then
+local function inspect()
+	local lock = state.lock or {}
+	local missing, mismatched = {}, {}
+	local ok, disabled = 0, 0
+	for _, spec in ipairs(state.specs or {}) do
+		if not S.is_enabled(spec) then
+			disabled = disabled + 1
+		elseif not G.is_repo(spec.dir) then
 			missing[#missing + 1] = spec.name
 		else
 			local current, err = I.check(spec, lock)
@@ -159,13 +163,47 @@ local function cmd_check()
 			end
 		end
 	end
+	return missing, mismatched, ok, disabled
+end
+
+local function cmd_check()
+	local missing, mismatched, ok, disabled = inspect()
 	if #missing > 0 then
 		notify("missing: " .. table.concat(missing, ", "), vim.log.levels.WARN)
 	end
 	if #mismatched > 0 then
 		notify("mismatched: " .. table.concat(mismatched, ", "), vim.log.levels.WARN)
 	end
-	notify(string.format("%d ok, %d missing, %d mismatched", ok, #missing, #mismatched))
+	notify(string.format("%d ok, %d missing, %d mismatched, %d disabled", ok, #missing, #mismatched, disabled))
+	return #missing == 0 and #mismatched == 0
+end
+
+local function cmd_status()
+	local missing, mismatched, ok, disabled = inspect()
+	local lock = state.lock or {}
+	local lock_missing, stale = L.diff(lock, state.specs or {})
+	notify(
+		string.format(
+			"%d plugin(s): %d ok, %d missing, %d mismatched, %d disabled",
+			#(state.specs or {}),
+			ok,
+			#missing,
+			#mismatched,
+			disabled
+		)
+	)
+	if #missing > 0 then
+		notify("missing: " .. table.concat(missing, ", "), vim.log.levels.WARN)
+	end
+	if #mismatched > 0 then
+		notify("mismatched: " .. table.concat(mismatched, ", "), vim.log.levels.WARN)
+	end
+	if #lock_missing > 0 then
+		notify("no lock entry: " .. table.concat(lock_missing, ", "), vim.log.levels.WARN)
+	end
+	if #stale > 0 then
+		notify("stale lock: " .. table.concat(stale, ", "), vim.log.levels.WARN)
+	end
 	return #missing == 0 and #mismatched == 0
 end
 
@@ -221,27 +259,39 @@ local function cmd_restore(args)
 end
 
 local function cmd_clean(args)
+	local lock = state.lock or {}
 	local stale = {}
 	local present = {}
 	for _, spec in ipairs(state.specs) do
 		present[spec.name] = true
 	end
-	for _, name in ipairs(L.names(state.lock)) do
+	for _, name in ipairs(L.names(lock)) do
 		if not present[name] then
 			stale[#stale + 1] = name
 		end
 	end
-	if #stale == 0 then
-		notify("nothing to clean")
-		return
-	end
-	local dirs = {}
-	for _, name in ipairs(stale) do
-		local dir = U.join(state.pack_dir, name)
-		if U.exists(dir) then
-			dirs[#dirs + 1] = dir
+	local targets = {}
+	if state.pack_dir then
+		for _, name in ipairs(stale) do
+			local dir = U.join(state.pack_dir, name)
+			if U.exists(dir) then
+				targets[name] = dir
+			end
+		end
+		if U.is_dir(state.pack_dir) then
+			for _, name in ipairs(vim.fn.readdir(state.pack_dir)) do
+				local dir = U.join(state.pack_dir, name)
+				if not present[name] and not lock[name] and U.is_dir(dir) then
+					targets[name] = dir
+				end
+			end
 		end
 	end
+	local dirs = {}
+	for _, dir in pairs(targets) do
+		dirs[#dirs + 1] = dir
+	end
+	table.sort(dirs)
 	if #dirs == 0 then
 		notify("nothing to clean")
 		return
@@ -255,9 +305,10 @@ local function cmd_clean(args)
 		vim.fn.delete(dir, "rf")
 	end
 	for _, name in ipairs(stale) do
-		L.remove(state.lock, name)
+		L.remove(lock, name)
 	end
-	local ok, err = L.save(state.lock_path, state.lock)
+	local ok, err = L.save(state.lock_path, lock)
+	state.lock = lock
 	if not ok then
 		notify(err, vim.log.levels.ERROR)
 	else
@@ -276,6 +327,7 @@ local function cmd_migrate(args)
 		notify(migrated or "migration failed", vim.log.levels.ERROR)
 		return
 	end
+	state.lock = lock
 	notify(string.format("migrated %d plugin(s)", #(migrated or {})))
 	return true
 end
@@ -285,7 +337,7 @@ local handlers = {
 	install = cmd_install,
 	update = cmd_update,
 	check = cmd_check,
-	status = cmd_check,
+	status = cmd_status,
 	build = cmd_build,
 	restore = cmd_restore,
 	clean = cmd_clean,
@@ -295,7 +347,7 @@ local handlers = {
 function M.dispatch(args)
 	local command = args[1]
 	if not command then
-		notify("usage: :NazoPlug {sync|install|update|check|build|restore|clean|migrate}")
+		notify("usage: :NazoPlug {sync|install|update|check|status|build|restore|clean|migrate}")
 		return
 	end
 	local handler = handlers[command]

@@ -361,7 +361,8 @@ If you have an existing lazy.nvim setup, run `:NazoPlug migrate` to reuse its da
 :NazoPlug install   " Install missing plugins
 :NazoPlug restore   " Restore lock commits
 :NazoPlug check     " Check install/lock status
-:NazoPlug clean     " Remove plugins missing from specs
+:NazoPlug status    " Show plugin and lock status
+:NazoPlug clean     " Remove plugins missing from specs/lock
 :NazoPlug migrate   " Migrate existing lazy.nvim data
 :NazoPlug build     " Run build hooks
 ```
