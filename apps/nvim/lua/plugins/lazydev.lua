@@ -5,8 +5,8 @@ return {
 		library = {
 			-- Load snacks.nvim types
 			{ path = "snacks.nvim", words = { "Snacks" } },
-			-- Load lazy.nvim types
-			{ path = "lazy.nvim", words = { "LazySpec", "LazyConfig" } },
+			-- Load nazoplug spec types
+			{ path = "nazoplug", words = { "NazoSpec" } },
 		},
 	},
 }

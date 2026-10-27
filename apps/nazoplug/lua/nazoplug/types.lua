@@ -1,0 +1,25 @@
+---@class NazoSpec
+---@field [1] string|fun()?
+---@field name string?
+---@field url string?
+---@field dir string?
+---@field lazy boolean?
+---@field priority integer?
+---@field event string|string[]?
+---@field ft string|string[]?
+---@field cmd string|string[]?
+---@field keys table[]?
+---@field dependencies (string|NazoSpec)[]?
+---@field config fun(spec: NazoSpec, opts: table)|table?
+---@field opts table?
+---@field init fun()?
+---@field build string|fun(spec: NazoSpec)|(string|fun(spec: NazoSpec))[]?
+---@field branch string?
+---@field version string|boolean?
+---@field commit string?
+---@field submodules boolean?
+---@field main string?
+---@field enabled boolean?
+---@field dev boolean?
+---@field _ table?
+return {}

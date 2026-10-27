@@ -1,13 +1,13 @@
 # Neovim Configuration
 
 このディレクトリは NazoVim-org/NazoVim リポジトリの Neovim 設定です。  
-lazy.nvim をプラグインマネージャーとして使用しています。
+自作プラグインマネージャー `nazoplug`（`apps/nazoplug/`）を使用しています。`init.lua` は `NAZOVIM_PLUGIN_MANAGER=lazy` のときだけ lazy.nvim にフォールバックします。
 
 ---
 
 ## 特徴
 
-- **軽量・高速・充実**: lazy.nvim による遅延読み込み
+- **軽量・高速・充実**: nazoplug による遅延読み込み
 - **LSP 完備**: TypeScript, Lua, Ruby, Nix, HTML, C/C++ など標準サポート
 - **モダンUI**: カスタムダッシュボード、ステータスライン、ファジーファインダー
 - **Treesitter**: シンタックスハイライト・インデント・テキストオブジェクト
@@ -22,13 +22,16 @@ lazy.nvim をプラグインマネージャーとして使用しています。
 ```text
 .
 ├── apps/
-│   └── nvim/                 # Neovim configuration
-│       ├── init.lua          # エントリーポイント・lazy.nvim bootstrap
-│       ├── lazy-lock.json    # プラグインバージョンロック
-│       └── lua/
-│           ├── config/       # options / keymaps / autocmds
-│           ├── plugins.lua   # プラグインカテゴリの import 定義
-│           └── plugins/      # プラグイン設定（カテゴリ別サブディレクトリ）
+│   ├── nvim/                 # Neovim configuration
+│   │   ├── init.lua          # エントリーポイント・nazoplug bootstrap
+│   │   ├── nazoplug-lock.json # プラグインバージョンロック
+│   │   └── lua/
+│   │       ├── config/       # options / keymaps / autocmds
+│   │       ├── plugins.lua   # プラグインカテゴリの import 定義
+│   │       └── plugins/      # プラグイン設定（カテゴリ別サブディレクトリ）
+│   └── nazoplug/             # 自作プラグインマネージャー
+│       ├── lua/nazoplug/     # loader / installer / lock / git
+│       └── tests/            # headless tests
 ├── packages/
 │   └── nix/                  # Nix modules
 ├── template/                 # ファイルテンプレート
@@ -40,6 +43,32 @@ lazy.nvim をプラグインマネージャーとして使用しています。
 ├── flake.nix                 # Nix flake (nix run / nix develop)
 ├── docs/
 └── .github/
+```
+
+---
+
+## プラグイン管理
+
+`:NazoPlug` で操作します。設定は `apps/nvim/nazoplug-lock.json`、実行時データは
+`stdpath("data")/site/pack/nazoplug/opt` と `stdpath("data")/nazoplug-lock.json` です。
+
+```vim
+:NazoPlug sync      " lock に合わせて導入・復元
+:NazoPlug install   " 未導入プラグインを導入
+:NazoPlug update    " 全プラグインを更新
+:NazoPlug check     " 導入状態と lock の差分を確認
+:NazoPlug restore   " lock の commit に復元
+:NazoPlug clean     " lock から外れたプラグインを削除
+:NazoPlug migrate   " 既存 lazy.nvim データを移行
+:NazoPlug build     " build hook を実行
+```
+
+headless テスト:
+
+```bash
+for t in spec install loader commands init; do
+  nvim --headless -u apps/nazoplug/tests/minimal_init.lua -l apps/nazoplug/tests/${t}_test.lua
+done
 ```
 
 ---

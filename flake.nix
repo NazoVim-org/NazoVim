@@ -3,7 +3,7 @@
 
   # ============================================================
   # monorepo structure:
-  #   apps/nvim/       — Neovim configuration (init.lua, lua/, lazy-lock.json)
+  #   apps/nvim/       — Neovim configuration (init.lua, lua/, nazoplug-lock.json)
   #   packages/nix/    — Nix modules and package definitions
   #   template/        — File templates for new projects
   #   docs/            — Documentation
@@ -26,23 +26,26 @@
       perSystem =
         { pkgs, ... }:
         let
-          neovim_12 = pkgs.neovim.overrideAttrs (oldAttrs: {
-            version = "0.12.0";
-            src = pkgs.fetchFromGitHub {
-              owner = "neovim";
-              repo = "neovim";
-              rev = "v0.12.0";
-              hash = "sha256-uWhrGAwQ2nnAkyJ46qGkYxJ5K1jtyUIQOAVu3yTlquk=";
-            };
-          });
+          neovim_12 = pkgs.wrapNeovim (
+            pkgs.neovim-unwrapped.overrideAttrs (oldAttrs: {
+              version = "0.12.0";
+              src = pkgs.fetchFromGitHub {
+                owner = "neovim";
+                repo = "neovim";
+                rev = "v0.12.0";
+                hash = "sha256-uWhrGAwQ2nnAkyJ46qGkYxJ5K1jtyUIQOAVu3yTlquk=";
+              };
+            })
+          ) { };
           # apps/nvim/ 以下の設定ファイルを Nix store にコピー
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazovim";
             version = "1.0.0";
             src = pkgs.lib.cleanSource ./apps/nvim;
             installPhase = ''
-              mkdir -p $out
+              mkdir -p $out/lua/nazoplug
               cp -r . $out/
+              cp -r ${./apps/nazoplug/lua/nazoplug}/. $out/lua/nazoplug/
             '';
           };
 
@@ -52,7 +55,10 @@
             name = "nvim";
             runtimeInputs = [
               neovim_12
-              pkgs.git # lazy.nvim の自己 bootstrap に必要
+              pkgs.git
+              pkgs.gnumake
+              pkgs.nodejs_latest
+              pkgs.tree-sitter
               pkgs.clang-tools # clangd
               pkgs.jdt-language-server # jdtls
               pkgs.ruby
@@ -62,6 +68,7 @@
               CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
               DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
               export NVIM_APPNAME="$APPNAME"
+              export NAZOVIM_PLUGIN_MANAGER="nazoplug"
               # symlink なら既存チェック不要、存在すれば上書き
               if [ -L "$CONFIG_DIR" ]; then
                 rm "$CONFIG_DIR"
@@ -69,11 +76,11 @@
                 rm -rf "$CONFIG_DIR"
               fi
               ln -s ${nvimConfig} "$CONFIG_DIR"
-              # lazy.nvim のデータディレクトリを事前に作成
+              # プラグインのデータディレクトリを事前に作成
               mkdir -p "$DATA_DIR"
               # 初回起動時に Nix store の lockfile を data dir にコピー
-              if [ ! -f "$DATA_DIR/lazy-lock.json" ] && [ -f "$CONFIG_DIR/lazy-lock.json" ]; then
-                cp "$CONFIG_DIR/lazy-lock.json" "$DATA_DIR/lazy-lock.json"
+              if [ ! -f "$DATA_DIR/nazoplug-lock.json" ] && [ -f "$CONFIG_DIR/nazoplug-lock.json" ]; then
+                cp "$CONFIG_DIR/nazoplug-lock.json" "$DATA_DIR/nazoplug-lock.json"
               fi
               exec nvim "$@"
             '';
@@ -104,6 +111,8 @@
               deno
               nodejs_latest
               pnpm
+              gnumake
+              tree-sitter
 
               # LSP
               lua-language-server
@@ -118,6 +127,7 @@
 
             shellHook = ''
               export NVIM_APPNAME="nvim-nazozokc"
+              export NAZOVIM_PLUGIN_MANAGER="nazoplug"
 
               CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/nvim-nazozokc"
 
