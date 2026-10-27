@@ -4,6 +4,7 @@ local L = require("nazoplug.lock")
 local I = require("nazoplug.install")
 local loader = require("nazoplug.loader")
 local triggers = require("nazoplug.triggers")
+local SC = require("nazoplug.spec_cache")
 
 local M = {}
 
@@ -115,14 +116,62 @@ function M.setup(opts, extra)
 	if type(input) == "string" then
 		input = { import = input }
 	end
-	local ok, specs, by_name, collect_err = pcall(S.collect, input, {
-		pack_dir = pack_dir,
-		defaults = defaults,
-		source = opts.source,
-	})
-	if not ok or not specs then
-		U.error("failed to collect plugin specs: " .. tostring(collect_err or by_name))
-		return nil
+	local function collect_specs()
+		local ok, list, map, err = pcall(S.collect, input, {
+			pack_dir = pack_dir,
+			defaults = defaults,
+			source = opts.source,
+		})
+		if not ok then
+			return nil, nil, tostring(list)
+		end
+		if not list then
+			return nil, nil, tostring(err or map)
+		end
+		return list, map
+	end
+
+	local use_cache = SC.enabled(input, opts)
+	local specs, by_name
+	local from_cache = false
+	if use_cache then
+		specs, by_name = SC.load()
+		from_cache = specs ~= nil
+	end
+	if not specs then
+		local collect_err
+		specs, by_name, collect_err = collect_specs()
+		if not specs then
+			U.error("failed to collect plugin specs: " .. tostring(collect_err))
+			return nil
+		end
+	end
+	if from_cache then
+		local cached_ok = true
+		for _, spec in ipairs(specs) do
+			if spec._.needs_hydrate then
+				local hydrated, hydrate_err = S.hydrate(spec, { pack_dir = pack_dir })
+				if not hydrated then
+					U.warn(string.format("failed to hydrate %s from spec cache: %s", spec.name, tostring(hydrate_err)))
+					cached_ok = false
+					break
+				end
+			end
+		end
+		if not cached_ok then
+			local collect_err
+			specs, by_name, collect_err = collect_specs()
+			if not specs then
+				U.error("failed to collect plugin specs: " .. tostring(collect_err))
+				return nil
+			end
+			from_cache = false
+		end
+	end
+	if use_cache and not from_cache then
+		vim.schedule(function()
+			SC.save(specs)
+		end)
 	end
 
 	for _, spec in ipairs(specs) do

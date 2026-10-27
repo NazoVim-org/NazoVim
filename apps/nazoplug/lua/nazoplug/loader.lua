@@ -129,6 +129,12 @@ function M.load(spec, reason)
 	if not spec or spec._.loaded then
 		return spec and spec._.loaded or false
 	end
+	if spec._.needs_hydrate or spec._.needs_config then
+		local hydrated, err = S.hydrate(spec, { pack_dir = M.pack_dir })
+		if not hydrated then
+			U.warn(string.format("failed to hydrate %s: %s", spec.name, tostring(err)))
+		end
+	end
 	if not S.is_enabled(spec) then
 		return false
 	end
@@ -153,7 +159,7 @@ function M.load(spec, reason)
 		end
 	end
 	M.packadd(spec.dir)
-	if spec.config or spec.opts then
+	if spec.config or spec.opts or spec._.has_config or spec._.needs_config then
 		M.config(spec)
 	end
 	spec._.loaded_at = vim.uv.hrtime()
@@ -248,6 +254,12 @@ function M.startup(specs, opts)
 		M.source_file(U.join(vim.env.VIMRUNTIME, "filetype.lua"))
 	end
 	for _, spec in ipairs(specs) do
+		if spec._.needs_hydrate then
+			local hydrated, err = S.hydrate(spec, { pack_dir = M.pack_dir })
+			if not hydrated then
+				U.warn(string.format("failed to hydrate %s: %s", spec.name, tostring(err)))
+			end
+		end
 		if type(spec.init) == "function" then
 			local ok, err = pcall(spec.init, spec)
 			if not ok then

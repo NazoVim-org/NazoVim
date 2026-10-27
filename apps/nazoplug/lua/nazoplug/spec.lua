@@ -15,7 +15,11 @@ local function as_list(value)
 		return {}
 	end
 	if type(value) == "table" and U.is_list(value) then
-		return value
+		local list = {}
+		for index = 1, #value do
+			list[index] = value[index]
+		end
+		return list
 	end
 	return { value }
 end
@@ -48,24 +52,40 @@ local function import_module(import, ctx)
 		error("import depth exceeded at " .. import)
 	end
 
-	local ok, result = pcall(require, import)
-	if ok then
-		ctx.depth = ctx.depth - 1
-		return result
-	end
-	local message = tostring(result)
-	if not message:match("module '.-' not found") then
-		ctx.depth = ctx.depth - 1
-		error(string.format("failed to import %s: %s", import, message))
-	end
-
 	local roots = {}
 	local seen = {}
-	for _, root in ipairs(vim.opt.rtp:get()) do
-		local dir = U.join(root, "lua", (import:gsub("%.", "/")))
-		if U.is_dir(dir) and not seen[dir] then
+	local rel = import:gsub("%.", "/")
+	local rtp = ctx.rtp
+	if not rtp then
+		rtp = vim.opt.rtp:get()
+		ctx.rtp = rtp
+	end
+	local has_init = false
+	local has_module = false
+	for _, root in ipairs(rtp) do
+		local dir = U.join(root, "lua", rel)
+		if not seen[dir] and U.is_dir(dir) then
 			seen[dir] = true
 			roots[#roots + 1] = dir
+			if U.is_file(U.join(dir, "init.lua")) then
+				has_init = true
+			end
+		end
+		if U.is_file(U.join(root, "lua", rel .. ".lua")) then
+			has_module = true
+		end
+	end
+
+	if #roots == 0 or has_init or has_module then
+		local ok, result = pcall(require, import)
+		if ok then
+			ctx.depth = ctx.depth - 1
+			return result, import
+		end
+		local message = tostring(result)
+		if not message:match("module '.-' not found") then
+			ctx.depth = ctx.depth - 1
+			error(string.format("failed to import %s: %s", import, message))
 		end
 	end
 
@@ -106,7 +126,16 @@ local function normalize(raw, ctx, is_dep, source)
 		return collect_any(raw.import, ctx, is_dep, source)
 	end
 
-	local spec = vim.deepcopy(raw)
+	local spec = {}
+	for key, value in pairs(raw) do
+		spec[key] = value
+	end
+	if type(raw.opts) == "table" then
+		spec.opts = vim.deepcopy(raw.opts)
+	end
+	if type(raw.config) == "table" then
+		spec.config = vim.deepcopy(raw.config)
+	end
 	local first = spec[1]
 	spec[1] = nil
 
@@ -143,9 +172,7 @@ local function normalize(raw, ctx, is_dep, source)
 		spec.dir = U.expand(spec.dir)
 	end
 
-	spec.branch = spec.branch
 	spec.submodules = spec.submodules ~= false
-	spec.lazy = spec.lazy
 	if spec.lazy == nil then
 		spec.lazy = ctx.defaults.lazy == nil and DEFAULT_LAZY or ctx.defaults.lazy
 	end
@@ -287,6 +314,12 @@ collect_any = function(value, ctx, is_dep, source)
 		return collect_any(value(), ctx, is_dep, source)
 	end
 	if type(value) == "string" then
+		if is_dep then
+			local existing = ctx.by_name[U.name_from_url(value)]
+			if existing then
+				return { existing }
+			end
+		end
 		local spec = normalize(value, ctx, is_dep, source)
 		return spec and { register_spec(spec, ctx) } or {}
 	end
@@ -303,10 +336,10 @@ collect_any = function(value, ctx, is_dep, source)
 	end
 
 	if value.import ~= nil then
-		local imported = import_module(value.import, ctx)
+		local imported, import_source = import_module(value.import, ctx)
 		local result = {}
 		for _, item in ipairs(as_list(imported)) do
-			vim.list_extend(result, collect_any(item, ctx, is_dep, source))
+			vim.list_extend(result, collect_any(item, ctx, is_dep, import_source or source))
 		end
 		return result
 	end
@@ -342,6 +375,79 @@ function M.collect(input, opts)
 		spec._.top = not spec._.dep
 	end
 	return ctx.list, ctx.by_name, collected
+end
+
+local hydrated_sources = {}
+
+local function load_source(source)
+	if source:match("%.lua$") or source:sub(1, 1) == "/" then
+		local chunk, err = loadfile(source)
+		if not chunk then
+			return nil, err
+		end
+		local ok, value = pcall(chunk)
+		if not ok then
+			return nil, value
+		end
+		return value
+	end
+	local ok, value = pcall(require, source)
+	if not ok then
+		return nil, value
+	end
+	return value
+end
+
+function M.hydrate(spec, opts)
+	if not spec or not spec._ or spec._.hydrated then
+		return true
+	end
+	local source = spec._.source
+	if not source then
+		return false, "spec has no source"
+	end
+	opts = opts or {}
+	local pack_dir = opts.pack_dir
+	local key = source .. "\0" .. tostring(pack_dir)
+	local by_name = hydrated_sources[key]
+	if not by_name then
+		local value, err = load_source(source)
+		if value == nil then
+			return false, err
+		end
+		local ok, _, loaded = pcall(M.collect, value, {
+			pack_dir = pack_dir,
+			defaults = { lazy = true },
+			source = source,
+		})
+		if not ok then
+			return false, loaded
+		end
+		by_name = loaded
+		hydrated_sources[key] = by_name
+	end
+	local hydrated = by_name[spec.name]
+	if not hydrated then
+		return false, "spec not found in source"
+	end
+	for _, field in ipairs({
+		"config",
+		"init",
+		"keys",
+		"opts",
+		"enabled",
+		"cond",
+		"build",
+		"main",
+	}) do
+		if hydrated[field] ~= nil then
+			spec[field] = hydrated[field]
+		end
+	end
+	spec._.hydrated = true
+	spec._.needs_hydrate = false
+	spec._.needs_config = false
+	return true
 end
 
 local function modules_in(dir)

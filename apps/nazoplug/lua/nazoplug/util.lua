@@ -271,12 +271,20 @@ function M.list_files(root, predicate)
 		end
 		for name, kind in iterator do
 			local path = M.join(dir, name)
-			local stat = uv.fs_stat(path)
-			if stat and stat.type == "directory" then
+			if kind == "directory" then
 				walk(path)
-			elseif stat and (stat.type == "file" or stat.type == "link") then
+			elseif kind == "file" or kind == "link" then
 				if not predicate or predicate(path, name) then
 					files[#files + 1] = path
+				end
+			elseif kind == nil then
+				local stat = uv.fs_stat(path)
+				if stat and stat.type == "directory" then
+					walk(path)
+				elseif stat and (stat.type == "file" or stat.type == "link") then
+					if not predicate or predicate(path, name) then
+						files[#files + 1] = path
+					end
 				end
 			end
 		end
