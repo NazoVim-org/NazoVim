@@ -26,17 +26,7 @@
       perSystem =
         { pkgs, ... }:
         let
-          neovim_12 = pkgs.wrapNeovim (
-            pkgs.neovim-unwrapped.overrideAttrs (oldAttrs: {
-              version = "0.12.0";
-              src = pkgs.fetchFromGitHub {
-                owner = "neovim";
-                repo = "neovim";
-                rev = "v0.12.0";
-                hash = "sha256-uWhrGAwQ2nnAkyJ46qGkYxJ5K1jtyUIQOAVu3yTlquk=";
-              };
-            })
-          ) { };
+          neovim_12 = pkgs.wrapNeovim pkgs.neovim-unwrapped { };
           # apps/nvim/ 以下の設定ファイルを Nix store にコピー
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazovim";
@@ -117,12 +107,12 @@
               # LSP
               lua-language-server
               nixd
-              nodePackages.typescript-language-server
+              typescript-language-server
 
               # Formatter
               stylua
               nixfmt-rfc-style
-              nodePackages.prettier
+              prettier
             ];
 
             shellHook = ''
