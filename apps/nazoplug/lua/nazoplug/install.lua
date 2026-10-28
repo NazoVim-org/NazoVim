@@ -438,6 +438,33 @@ function M.check(spec, lock)
 	return true, head
 end
 
+function M.migration_uptodate(old_pack_dir)
+	local marker = U.join(old_pack_dir, ".nazoplug-migrated")
+	local mstat = vim.uv.fs_stat(marker)
+	if not mstat then
+		return false
+	end
+	local dstat = vim.uv.fs_stat(old_pack_dir)
+	if not dstat then
+		return false
+	end
+	if
+		dstat.mtime.sec > mstat.mtime.sec
+		or (dstat.mtime.sec == mstat.mtime.sec and dstat.mtime.nsec > mstat.mtime.nsec)
+	then
+		return false
+	end
+	return true
+end
+
+function M.mark_migrated(old_pack_dir)
+	local marker = U.join(old_pack_dir, ".nazoplug-migrated")
+	local ok, err = U.write_atomic(marker, "migrated\n")
+	if not ok then
+		U.warn("failed to write migration marker: " .. tostring(err))
+	end
+end
+
 function M.migrate(specs, opts)
 	opts = opts or {}
 	local lock = {}
@@ -476,6 +503,9 @@ function M.migrate(specs, opts)
 		if not ok then
 			return nil, err
 		end
+	end
+	if opts.old_pack_dir then
+		M.mark_migrated(opts.old_pack_dir)
 	end
 	return lock, migrated
 end

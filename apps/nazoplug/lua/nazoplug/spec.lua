@@ -528,6 +528,17 @@ function M.resolve_main(spec)
 	return nil
 end
 
+function M.needs_startup_hydrate(spec)
+	local m = spec and spec._
+	if not m then
+		return false
+	end
+	if m.needs_hydrate then
+		return true
+	end
+	return m.needs_config and (m.rtp_loaded or spec.lazy == false)
+end
+
 function M.validate(spec)
 	local errors, warnings = {}, {}
 	if not spec.name or spec.name == "" then

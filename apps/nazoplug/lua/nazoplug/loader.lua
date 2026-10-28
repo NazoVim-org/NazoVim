@@ -254,7 +254,7 @@ function M.startup(specs, opts)
 		M.source_file(U.join(vim.env.VIMRUNTIME, "filetype.lua"))
 	end
 	for _, spec in ipairs(specs) do
-		if spec._.needs_hydrate or spec._.needs_config then
+		if S.needs_startup_hydrate(spec) then
 			local hydrated, err = S.hydrate(spec, { pack_dir = M.pack_dir })
 			if not hydrated then
 				U.warn(string.format("failed to hydrate %s: %s", spec.name, tostring(err)))

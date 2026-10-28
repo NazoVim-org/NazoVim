@@ -2,15 +2,31 @@ local U = require("nazoplug.util")
 
 local M = {}
 
-local VERSION = 1
+local VERSION = 2
 local uv = vim.uv or vim.loop
 
 local function cache_path()
 	return U.join(vim.fn.stdpath("cache"), "nazoplug", "spec-cache.lua")
 end
 
+local function bytecode_path()
+	return U.join(vim.fn.stdpath("cache"), "nazoplug", "spec-cache.luac")
+end
+
 function M.path()
 	return cache_path()
+end
+
+function M.bytecode_path()
+	return bytecode_path()
+end
+
+local function dump_bytecode(chunk)
+	local ok, bytecode = pcall(string.dump, chunk)
+	if ok then
+		return bytecode
+	end
+	return nil
 end
 
 function M.enabled(input, opts)
@@ -178,6 +194,24 @@ local function field(fields, name, value)
 	return true
 end
 
+local function cacheable(value, seen)
+	local kind = type(value)
+	if kind ~= "table" then
+		return kind == "nil" or kind == "boolean" or kind == "number" or kind == "string"
+	end
+	seen = seen or {}
+	if seen[value] then
+		return false
+	end
+	seen[value] = true
+	for _, item in pairs(value) do
+		if not cacheable(item, seen) then
+			return false
+		end
+	end
+	return true
+end
+
 local function entry_code(spec)
 	local source = spec._ and spec._.source
 	if type(source) ~= "string" or source == "" then
@@ -224,6 +258,13 @@ local function entry_code(spec)
 
 	local has_config = type(spec.config) == "function"
 	local needs_config = has_config
+	local keys_ok = spec.keys == nil or cacheable(spec.keys)
+	if spec.keys ~= nil and keys_ok then
+		local ok, err = add("keys", spec.keys)
+		if not ok then
+			return nil, err
+		end
+	end
 	if spec.config == false then
 		local ok, err = add("config", false)
 		if not ok then
@@ -235,7 +276,7 @@ local function entry_code(spec)
 			needs_config = true
 		end
 	end
-	local needs_hydrate = spec.keys ~= nil
+	local needs_hydrate = (spec.keys ~= nil and not keys_ok)
 		or type(spec.init) == "function"
 		or type(spec.enabled) == "function"
 		or type(spec.cond) == "function"
@@ -329,7 +370,15 @@ function M.save(specs)
 		table.concat(entries, ",\n"),
 		"},}",
 	}, "\n")
-	return U.write_atomic(cache_path(), data)
+	local written, err = U.write_atomic(cache_path(), data)
+	if not written then
+		return nil, err
+	end
+	local bytecode = dump_bytecode(loadstring(data))
+	if bytecode then
+		U.write_atomic(bytecode_path(), bytecode)
+	end
+	return true
 end
 
 local function verify(cache)
@@ -364,7 +413,16 @@ local function verify(cache)
 end
 
 function M.load()
-	local chunk, err = loadfile(cache_path())
+	local chunk, err = loadfile(bytecode_path())
+	if not chunk then
+		chunk, err = loadfile(cache_path())
+		if chunk then
+			local bytecode = dump_bytecode(chunk)
+			if bytecode then
+				U.write_atomic(bytecode_path(), bytecode)
+			end
+		end
+	end
 	if not chunk then
 		return nil, err
 	end

@@ -291,6 +291,24 @@ test("migrate preserves lock entries for missing plugins", function()
 	truthy(vim.tbl_contains(migrated, "migrated.nvim") == false)
 end)
 
+test("migration marker reports up-to-date after migrate", function()
+	local old_pack_dir = U.join(tmp, "old-pack")
+	local source_repo = U.join(old_pack_dir, "relocated.nvim")
+	vim.fn.mkdir(source_repo, "p")
+	truthy(G.run({ "init", "-b", "main" }, { cwd = source_repo }))
+	truthy(G.run({ "config", "user.email", "test@example.com" }, { cwd = source_repo }))
+	truthy(G.run({ "config", "user.name", "Test" }, { cwd = source_repo }))
+	commit(source_repo, "relocated")
+	local target = spec({ name = "relocated.nvim" })
+	if U.exists(target.dir) then
+		truthy(vim.fn.delete(target.dir, "rf") == 0)
+	end
+	eq(I.migration_uptodate(old_pack_dir), false)
+	local _, migrated = I.migrate({ target }, { old_pack_dir = old_pack_dir })
+	truthy(vim.tbl_contains(migrated, "relocated.nvim"))
+	eq(I.migration_uptodate(old_pack_dir), true)
+end)
+
 test("lock save keeps install entries", function()
 	local lock = {}
 	local s = spec({ name = "lock.nvim" })

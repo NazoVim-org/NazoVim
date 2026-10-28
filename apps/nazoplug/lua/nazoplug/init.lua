@@ -149,7 +149,7 @@ function M.setup(opts, extra)
 	if from_cache then
 		local cached_ok = true
 		for _, spec in ipairs(specs) do
-			if spec._.needs_hydrate then
+			if S.needs_startup_hydrate(spec) then
 				local hydrated, hydrate_err = S.hydrate(spec, { pack_dir = pack_dir })
 				if not hydrated then
 					U.warn(string.format("failed to hydrate %s from spec cache: %s", spec.name, tostring(hydrate_err)))
@@ -184,7 +184,7 @@ function M.setup(opts, extra)
 		end
 	end
 
-	if opts.migrate ~= false and U.is_dir(old_pack_dir) then
+	if opts.migrate ~= false and U.is_dir(old_pack_dir) and not I.migration_uptodate(old_pack_dir) then
 		local migrated, migration_err = I.migrate(specs, { old_pack_dir = old_pack_dir, strict = false })
 		if not migrated then
 			U.warn("migration failed: " .. tostring(migration_err))

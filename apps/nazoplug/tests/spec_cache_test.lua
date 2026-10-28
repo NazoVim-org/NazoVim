@@ -66,6 +66,29 @@ test("spec cache rejects a changed source", function()
 	eq(cached, nil)
 end)
 
+test("spec cache stores plain keys without needing hydration", function()
+	package.loaded["plugins.example"] = nil
+	U.write_file(source, [[return { { "owner/example.nvim", keys = { "<leader>ex" } } } ]])
+	local specs = S.collect({ import = "plugins.example" }, { source = source, pack_dir = pack_dir })
+	assert(C.save(specs))
+	assert(U.is_file(C.bytecode_path()), "bytecode cache should be written")
+	local cached, cached_by_name = C.load()
+	eq(#cached, 1)
+	eq(cached_by_name["example.nvim"].keys, { "<leader>ex" })
+	eq(cached_by_name["example.nvim"]._.needs_hydrate, false)
+end)
+
+test("spec cache marks function keys for hydration", function()
+	package.loaded["plugins.example"] = nil
+	U.write_file(source, [[return { { "owner/example.nvim", keys = { { "<leader>ex", function() end } } } } ]])
+	local specs = S.collect({ import = "plugins.example" }, { source = source, pack_dir = pack_dir })
+	assert(C.save(specs))
+	local cached, cached_by_name = C.load()
+	eq(#cached, 1)
+	eq(cached_by_name["example.nvim"].keys, nil)
+	eq(cached_by_name["example.nvim"]._.needs_hydrate, true)
+end)
+
 vim.fn.delete(tmp, "rf")
 io.write(string.format("\n%d passed, %d failed\n", passed, failed))
 if failed > 0 then
