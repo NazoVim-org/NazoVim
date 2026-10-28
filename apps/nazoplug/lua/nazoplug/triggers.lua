@@ -115,6 +115,7 @@ local function setup_cmd(spec)
 			U.warn(string.format("command %q contains whitespace and cannot be lazy-loaded", name))
 		elseif M.created["cmd:" .. name] then
 			-- Another spec already owns this lazy command.
+			goto continue
 		elseif command_exists(name) then
 			U.warn(string.format("command %s already exists; not creating a lazy command", name))
 		else
@@ -162,6 +163,7 @@ local function setup_cmd(spec)
 				U.warn(string.format("failed to create command %s: %s", name, err))
 			end
 		end
+		::continue::
 	end
 end
 

@@ -317,7 +317,7 @@ local function cmd_clean(args)
 	return ok ~= nil
 end
 
-local function cmd_migrate(args)
+local function cmd_migrate()
 	local lock, migrated = I.migrate(state.specs, {
 		old_pack_dir = state.old_pack_dir,
 		lock_path = state.lock_path,

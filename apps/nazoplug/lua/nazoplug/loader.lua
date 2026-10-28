@@ -1,5 +1,4 @@
 local U = require("nazoplug.util")
-local G = require("nazoplug.git")
 local S = require("nazoplug.spec")
 
 local M = {}
@@ -147,6 +146,7 @@ function M.load(spec, reason)
 	end
 
 	spec._.loaded = true
+	spec._.load_reason = reason
 	local triggers_ok, triggers = pcall(require, "nazoplug.triggers")
 	if triggers_ok and triggers.disable then
 		triggers.disable(spec)

@@ -139,7 +139,8 @@ test("lock saves sorted json and loads it", function()
 	local text = U.read_file(lock_path)
 	eq(
 		text,
-		'{"a":{"commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"z":{"branch":"main","commit":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}\n'
+		'{"a":{"commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},"z":{"branch":"main",'
+			.. '"commit":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"}}\n'
 	)
 	local loaded = truthy(L.load(lock_path))
 	eq(loaded, lock)

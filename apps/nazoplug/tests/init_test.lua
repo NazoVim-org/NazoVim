@@ -13,7 +13,7 @@ local function test(name, fn)
 	end
 end
 
-function truthy(value, label)
+local function truthy(value, label)
 	if not value then
 		error((label or "value") .. " is not truthy", 2)
 	end
