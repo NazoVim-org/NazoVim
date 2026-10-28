@@ -107,12 +107,12 @@
               # LSP
               lua-language-server
               nixd
-              nodePackages.typescript-language-server
+              typescript-language-server
 
               # Formatter
               stylua
               nixfmt-rfc-style
-              nodePackages.prettier
+              prettier
             ];
 
             shellHook = ''
