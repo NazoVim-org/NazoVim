@@ -52,5 +52,7 @@ jobs:
 
       - name: luacheck
         run: |
+          code=0
           nix shell nixpkgs#lua54Packages.luacheck --command \
-            luacheck apps/nazoplug apps/nvim/lua/ apps/nvim/init.lua --globals vim; code=$?; [ $code -lt 2 ]
+            luacheck apps/nazoplug apps/nvim/lua/ apps/nvim/init.lua --globals vim || code=$?
+          [ "$code" -lt 2 ]
