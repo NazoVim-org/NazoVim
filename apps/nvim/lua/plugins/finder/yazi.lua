@@ -1,8 +1,8 @@
----@type LazySpec
+---@type NazoSpec
 return {
 	"mikavilpas/yazi.nvim",
 	version = "*",
-	cmd = { "Yazi", "Yazi cwd", "Yazi toggle" },
+	cmd = { "Yazi" },
 	dependencies = {
 		{ "nvim-lua/plenary.nvim", lazy = true },
 	},

@@ -27,7 +27,7 @@
 
 <!-- markdownlint-disable MD013 -->
 **nazovim** is a personal Neovim distribution tailored for CLI/TUI-centric workflows.
-Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme and aggressive lazy-loading via [lazy.nvim](https://github.com/folke/lazy.nvim), it comes with everything needed for TypeScript, Lua, Nix, Ruby, and more.
+Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme and aggressive lazy-loading via the in-house `nazoplug` manager, it comes with everything needed for TypeScript, Lua, Nix, Ruby, and more.
 
 > Distributed as a Nix flake — run it instantly in an isolated environment with a single `nix run` command.
 <!-- markdownlint-enable MD013 -->
@@ -43,7 +43,7 @@ Built on the [kanagawa](https://github.com/rebelot/kanagawa.nvim) color scheme a
 ## 🚀 Features
 
 <!-- markdownlint-disable MD013 -->
-- **⚡ Fast startup** — Aggressive lazy-loading with lazy.nvim. Anything that can wait is deferred to `VeryLazy`
+- **⚡ Fast startup** — Aggressive lazy-loading with nazoplug. Anything that can wait is deferred to `VeryLazy`
 - **🔧 Full LSP** — Multi-language support: TypeScript / Lua / Ruby / Nix / C / Java / Zig and more. Dual setup with mason + manual (nixd)
 - **🎨 kanagawa** — `kanagawa-dragon` theme with transparent background that blends seamlessly with your terminal
 - **🧠 AI integration** — Supports both Claude Code (`claudecode.nvim`) and opencode (`opencode.nvim`)
@@ -95,16 +95,21 @@ The configuration is deployed in isolation under `~/.config/nvim-nazozokc`, leav
 <!-- markdownlint-enable MD013 -->
 
 ```bash
-# Sparse checkout — only downloads apps/nvim/
+# Sparse checkout — downloads apps/nvim/ and apps/nazoplug/
 git clone --depth 1 --filter=blob:none --sparse \
   https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
 cd ~/.config/nvim
-git sparse-checkout set apps/nvim
-mv apps/nvim/* . && rm -rf apps
+git sparse-checkout set apps/nvim apps/nazoplug
+mv apps/nvim/* .
+mkdir -p lua
+cp -r apps/nazoplug/lua/nazoplug lua/
+rm -rf apps
 nvim
 ```
 
-On first launch, lazy.nvim will automatically install all plugins.
+After the first launch, run `:NazoPlug install` to install missing plugins.
+If you have an existing lazy.nvim setup,
+run `:NazoPlug migrate` to reuse its data directory.
 
 > For development, clone the full repository instead:
 > `git clone https://github.com/NazoVim-org/NazoVim.git`
@@ -116,13 +121,16 @@ On first launch, lazy.nvim will automatically install all plugins.
 ```text
 .
 ├── apps/
-│   └── nvim/                 # 🎯 Neovim configuration (entry point)
-│       ├── init.lua          # lazy.nvim bootstrap
-│       ├── lazy-lock.json    # Plugin version lock
-│       └── lua/
-│           ├── config/       # options / keymaps / autocmds
-│           ├── plugins.lua   # Plugin category imports
-│           └── plugins/      # Plugin configs (one file per plugin)
+│   ├── nvim/                 # 🎯 Neovim configuration (entry point)
+│   │   ├── init.lua          # nazoplug bootstrap (lazy.nvim fallback)
+│   │   ├── nazoplug-lock.json # Plugin version lock
+│   │   └── lua/
+│   │       ├── config/       # options / keymaps / autocmds
+│   │       ├── plugins.lua   # Plugin category imports
+│   │       └── plugins/      # Plugin configs (one file per plugin)
+│   └── nazoplug/             # In-house plugin manager
+│       ├── lua/nazoplug/     # loader / installer / lock / git
+│       └── tests/            # headless tests
 ├── packages/
 │   └── nix/                  # Nix modules
 ├── template/                 # File templates
@@ -349,16 +357,21 @@ On first launch, lazy.nvim will automatically install all plugins.
 ### Update plugins
 
 ```vim
-:Lazy sync   " Update all plugins
-:Lazy clean  " Remove unused plugins
-:Lazy snapshot " Lock current versions
+:NazoPlug sync      " Install/restore from the lock
+:NazoPlug update    " Update all plugins
+:NazoPlug install   " Install missing plugins
+:NazoPlug restore   " Restore lock commits
+:NazoPlug check     " Check install/lock status
+:NazoPlug status    " Show plugin and lock status
+:NazoPlug clean     " Remove plugins missing from specs/lock
+:NazoPlug migrate   " Migrate existing lazy.nvim data
+:NazoPlug build     " Run build hooks
 ```
 
 ### Reload config
 
 ```vim
-:Lazy reload   " Reload configuration
-:source %      " Source current buffer
+:source %   " Source current buffer
 ```
 
 ---
@@ -421,7 +434,7 @@ Issue templates are available for:
 
 - 🐛 **Bug Report** — Include reproduction steps, Neovim version, and error logs
 - ✨ **Feature Request** — Describe your motivation and proposed solution
-- 🔌 **Plugin Proposal** — Include plugin name, URL, and a lazy.nvim config snippet
+- 🔌 **Plugin Proposal** — Include plugin name, URL, and a nazoplug spec snippet
 
 ---
 

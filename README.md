@@ -28,7 +28,7 @@
 **nazovim** は、CLI・TUI中心のワークフローに特化したNeovimディストリビューションです。
 
 <!-- markdownlint-disable MD013 -->
-[kanagawa](https://github.com/rebelot/kanagawa.nvim) カラースキームと [lazy.nvim](https://github.com/folke/lazy.nvim) による高速な遅延ロードを基盤に、TypeScript・Lua・Nix・Rubyなどの開発に必要なすべてが揃っています。
+[kanagawa](https://github.com/rebelot/kanagawa.nvim) カラースキームと、自作プラグインマネージャー `nazoplug` による高速な遅延ロードを基盤に、TypeScript・Lua・Nix・Rubyなどの開発に必要なすべてが揃っています。
 <!-- markdownlint-enable MD013 -->
 
 > Nixのflakeとして配布しているため、`nix run` 一発で隔離された状態から即起動できます。
@@ -38,7 +38,7 @@
 ## 🚀 Features
 
 <!-- markdownlint-disable MD013 -->
-- **⚡ Fast startup** — lazy.nvim によるアグレッシブな遅延ロード。起動を邪魔するものは VeryLazy 以降に追いやる
+- **⚡ Fast startup** — nazoplug によるアグレッシブな遅延ロード。起動を邪魔するものは VeryLazy 以降に追いやる
 - **🔧 Full LSP** — TypeScript / Lua / Ruby / Nix / C / Java / Zig など多言語対応。mason + 手動 (nixd) の両刀
 - **🎨 kanagawa** — `kanagawa-dragon` テーマ + 透明背景でターミナルと溶け込む
 - **🧠 AI統合** — Claude Code (`claudecode.nvim`) と opencode (`opencode.nvim`) を両方サポート
@@ -88,19 +88,23 @@ nix run github:NazoVim-org/NazoVim
 > **注意**: 既存の Neovim 設定を上書きします。バックアップを推奨します。
 
 ```bash
-# Sparse checkout — `apps/nvim/` だけをダウンロード
+# Sparse checkout — `apps/nvim/` と `apps/nazoplug/` をダウンロード
 git clone --depth 1 --filter=blob:none --sparse \
   https://github.com/NazoVim-org/NazoVim.git ~/.config/nvim
 cd ~/.config/nvim
-git sparse-checkout set apps/nvim
-mv apps/nvim/* . && rm -rf apps
+git sparse-checkout set apps/nvim apps/nazoplug
+mv apps/nvim/* .
+mkdir -p lua
+cp -r apps/nazoplug/lua/nazoplug lua/
+rm -rf apps
 nvim
 ```
 
-初回起動時に lazy.nvim がすべてのプラグインを自動インストールします。
+初回起動後に `:NazoPlug install` を実行すると、未導入のプラグインをインストールします。
+既存の lazy.nvim 環境がある場合は `:NazoPlug migrate` でデータディレクトリを引き継げます。
 
-> monorepo 構成のため、Neovim 設定は `apps/nvim/` にあります。
-> 上記の sparse checkout でリポジトリ全体を clone せずに `apps/nvim/` だけ取得できます。
+> monorepo 構成のため、Neovim 設定は `apps/nvim/`、マネージャーは `apps/nazoplug/` にあります。
+> 上記の sparse checkout で両方取得できます。
 
 ---
 
@@ -109,13 +113,16 @@ nvim
 ```text
 .
 ├── apps/
-│   └── nvim/                 # 🎯 Neovim configuration (entry point)
-│       ├── init.lua          # lazy.nvim bootstrap
-│       ├── lazy-lock.json    # プラグインバージョンロック
-│       └── lua/
-│           ├── config/       # options / keymaps / autocmds
-│           ├── plugins.lua   # プラグインカテゴリの import 定義
-│           └── plugins/      # プラグイン設定
+│   ├── nvim/                 # 🎯 Neovim configuration (entry point)
+│   │   ├── init.lua          # nazoplug bootstrap (lazy.nvim fallback)
+│   │   ├── nazoplug-lock.json # プラグインバージョンロック
+│   │   └── lua/
+│   │       ├── config/       # options / keymaps / autocmds
+│   │       ├── plugins.lua   # プラグインカテゴリの import 定義
+│   │       └── plugins/      # プラグイン設定
+│   └── nazoplug/             # 自作プラグインマネージャー
+│       ├── lua/nazoplug/     # loader / installer / lock / git
+│       └── tests/            # headless tests
 ├── packages/
 │   └── nix/                  # Nix modules
 ├── template/                 # ファイルテンプレート
@@ -342,16 +349,21 @@ nvim
 ### プラグイン更新
 
 ```vim
-:Lazy sync   " 全プラグインを更新
-:Lazy clean  " 未使用プラグインを削除
-:Lazy snapshot " 現在のバージョンをロック
+:NazoPlug sync      " lock に合わせて導入・復元
+:NazoPlug update    " 全プラグインを最新へ更新
+:NazoPlug install   " 未導入プラグインを導入
+:NazoPlug restore   " lock の commit に復元
+:NazoPlug check     " 導入状態と lock の差分を確認
+:NazoPlug status    " プラグイン状態と lock の差分を表示
+:NazoPlug clean     " spec/lock から外れたプラグインを削除
+:NazoPlug migrate   " 既存 lazy.nvim データを移行
+:NazoPlug build     " build hook を実行
 ```
 
 ### 設定リロード
 
 ```vim
-:Lazy reload   " 設定を再読み込み
-:source %      " 現在のバッファを sourced
+:source %   " 現在のバッファを sourced
 ```
 
 ---
@@ -416,7 +428,7 @@ Issue templateが用意されています:
 
 - 🐛 **Bug Report** — 再現手順・Neovimバージョン・エラーログ付きで
 - ✨ **Feature Request** — 動機と提案内容を
-- 🔌 **Plugin Proposal** — プラグイン名・URL・lazy.nvimの設定案を
+- 🔌 **Plugin Proposal** — プラグイン名・URL・nazoplug の設定案を
 
 ---
 

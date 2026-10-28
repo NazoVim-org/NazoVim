@@ -20,21 +20,25 @@ jobs:
       - name: Cache Nix store
         uses: DeterminateSystems/magic-nix-cache-action@v15
 
-      # lazy.nvim プラグインのキャッシュ
-      - name: Cache lazy.nvim plugins
+      # nazoplug プラグインのキャッシュ
+      - name: Cache nazoplug plugins
         uses: actions/cache@v6
         with:
-          path: ~/.local/share/nvim-nazozokc/lazy
-          key: lazy-${{ runner.os }}-${{ hashFiles('apps/nvim/lazy-lock.json') }}
+          path: |
+            ~/.local/share/nvim-nazozokc/site/pack/nazoplug
+            ~/.local/share/nvim-nazozokc/lazy
+          key: nazoplug-${{ runner.os }}-${{ hashFiles('apps/nvim/nazoplug-lock.json') }}
           restore-keys: |
+            nazoplug-${{ runner.os }}-
             lazy-${{ runner.os }}-
 
       - name: Set up Neovim config
         run: |
           export NVIM_APPNAME="nvim-nazozokc"
           CONFIG_DIR="$HOME/.config/$NVIM_APPNAME"
-          mkdir -p "$CONFIG_DIR"
+          mkdir -p "$CONFIG_DIR/lua"
           cp -r apps/nvim/. "$CONFIG_DIR/"
+          cp -r apps/nazoplug/lua/nazoplug "$CONFIG_DIR/lua/"
           chmod -R u+w "$CONFIG_DIR"
           echo "NVIM_APPNAME=$NVIM_APPNAME" >> "$GITHUB_ENV"
           echo "CONFIG_DIR=$CONFIG_DIR" >> "$GITHUB_ENV"
@@ -47,17 +51,18 @@ jobs:
           npm config set prefix /tmp/npm-global
           echo "/tmp/npm-global/bin" >> "$GITHUB_PATH"
 
-      - name: Install lazy.nvim plugins
-        timeout-minutes: 10
+      - name: Install nazoplug plugins
+        timeout-minutes: 30
         env:
           NPM_CONFIG_PREFIX: /tmp/npm-global
         run: |
           nix develop --command sh -c '
             export NVIM_APPNAME="nvim-nazozokc"
             export NPM_CONFIG_PREFIX=/tmp/npm-global
-            nvim --headless "+Lazy! sync" +q 2>&1 | tee /tmp/lazy-sync.log
-            echo "--- lazy sync log ---"
-            cat /tmp/lazy-sync.log
+            nvim --headless "+NazoPlug sync" +q 2>&1 | tee /tmp/nazoplug-sync.log
+            echo "--- nazoplug sync log ---"
+            cat /tmp/nazoplug-sync.log
+            nvim --headless "+lua if not require([[nazoplug.commands]]).dispatch({[[check]]}) then vim.cmd([[cquit 1]]) end" +q
           '
 
       - name: Check Neovim startup (no errors)
@@ -99,5 +104,5 @@ jobs:
           name: nvim-startup-logs
           path: |
             /tmp/nvim-stderr.log
-            /tmp/lazy-sync.log
+            /tmp/nazoplug-sync.log
             /tmp/startuptime.log

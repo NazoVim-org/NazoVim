@@ -1,0 +1,145 @@
+local passed, failed = 0, 0
+
+local function test(name, fn)
+	local ok, err = xpcall(fn, debug.traceback)
+	if ok then
+		passed = passed + 1
+		io.write("ok   " .. name .. "\n")
+	else
+		failed = failed + 1
+		io.write("FAIL " .. name .. "\n" .. tostring(err) .. "\n")
+	end
+end
+
+local function eq(actual, expected, label)
+	if not vim.deep_equal(actual, expected) then
+		error(string.format("%s: expected %s, got %s", label or "value", vim.inspect(expected), vim.inspect(actual)), 2)
+	end
+end
+
+local function truthy(value, label)
+	if not value then
+		error((label or "value") .. " is not truthy", 2)
+	end
+	return value
+end
+
+local C = require("nazoplug.commands")
+local H = require("nazoplug.health")
+local S = require("nazoplug.spec")
+local G = require("nazoplug.git")
+local U = require("nazoplug.util")
+local tmp = vim.fn.tempname()
+vim.fn.mkdir(tmp, "p")
+
+local origin = U.join(tmp, "origin")
+vim.fn.mkdir(origin, "p")
+G.run({ "init", "-b", "main" }, { cwd = origin })
+G.run({ "config", "user.email", "test@example.com" }, { cwd = origin })
+G.run({ "config", "user.name", "Test" }, { cwd = origin })
+vim.fn.writefile({ "test" }, U.join(origin, "file.txt"))
+G.run({ "add", "." }, { cwd = origin })
+G.run({ "commit", "-m", "one" }, { cwd = origin })
+
+test("commands registers NazoPlug and handles empty state", function()
+	C.setup({
+		specs = {},
+		by_name = {},
+		lock = {},
+		lock_path = tmp .. "/lock.json",
+		pack_dir = tmp .. "/pack",
+		old_pack_dir = tmp .. "/old",
+	})
+	eq(vim.fn.exists(":NazoPlug"), 2)
+	eq(C.dispatch({ "check" }), true)
+	eq(C.dispatch({ "status" }), true)
+	C.dispatch({ "install" })
+	C.dispatch({ "update" })
+	C.dispatch({ "build" })
+	C.dispatch({ "restore" })
+	C.dispatch({ "clean" })
+	C.dispatch({ "migrate" })
+	C.dispatch({ "bogus" })
+	C.dispatch({})
+end)
+
+test("commands install selected plugin with its dependencies", function()
+	local pack_dir = U.join(tmp, "command-pack")
+	local input = {
+		{
+			name = "command-parent.nvim",
+			url = origin,
+			dependencies = { { url = origin, name = "command-child.nvim" } },
+		},
+	}
+	local specs, by_name = S.collect(input, { pack_dir = pack_dir })
+	C.setup({
+		specs = specs,
+		by_name = by_name,
+		lock = {},
+		lock_path = U.join(tmp, "command-lock.json"),
+		pack_dir = pack_dir,
+		old_pack_dir = U.join(tmp, "command-old"),
+	})
+	eq(C.dispatch({ "install", "command-parent.nvim" }), true)
+	truthy(U.is_dir(by_name["command-parent.nvim"].dir))
+	truthy(U.is_dir(by_name["command-child.nvim"].dir))
+
+	vim.fn.delete(by_name["command-child.nvim"].dir, "rf")
+	eq(C.dispatch({ "install", "command-parent.nvim" }), true)
+	truthy(U.is_dir(by_name["command-child.nvim"].dir))
+end)
+
+test("commands clean removes orphan directories", function()
+	local pack_dir = U.join(tmp, "clean-pack")
+	local orphan = U.join(pack_dir, "orphan.nvim")
+	truthy(U.mkdir(orphan))
+	C.setup({
+		specs = {},
+		by_name = {},
+		lock = {},
+		lock_path = U.join(tmp, "clean-lock.json"),
+		pack_dir = pack_dir,
+		old_pack_dir = U.join(tmp, "clean-old"),
+	})
+	eq(C.dispatch({ "clean", "--yes" }), true)
+	eq(U.exists(orphan), false)
+end)
+
+test("commands migrate refreshes the in-memory lock", function()
+	local lock_path = U.join(tmp, "migrate-state-lock.json")
+	local commit = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	truthy(U.write_file(lock_path, string.format('{"migrated.nvim":{"commit":"%s"}}\n', commit)))
+	C.setup({
+		specs = {},
+		by_name = {},
+		lock = {},
+		lock_path = lock_path,
+		pack_dir = U.join(tmp, "migrate-state-pack"),
+		old_pack_dir = U.join(tmp, "migrate-state-old"),
+	})
+	eq(C.dispatch({ "migrate" }), true)
+	eq(C.state().lock["migrated.nvim"].commit, commit)
+end)
+
+test("health check runs with empty state", function()
+	H.setup({
+		specs = {},
+		lock = {},
+		lock_path = tmp .. "/lock.json",
+		config_lock = tmp .. "/config-lock.json",
+		pack_dir = tmp .. "/pack",
+	})
+	local ok, err = pcall(H.check)
+	if not ok then
+		error(err)
+	end
+end)
+
+vim.fn.delete(tmp, "rf")
+io.write(string.format("\n%d passed, %d failed\n", passed, failed))
+if failed > 0 then
+	vim.cmd("cquit 1")
+else
+	vim.cmd("qall!")
+end

@@ -66,9 +66,9 @@ body:
       placeholder: "e.g. vim-sneak"
 
   - type: textarea
-    id: lazy_spec
+    id: nazoplug_spec
     attributes:
-      label: "Suggested lazy.nvim spec / lazy.nvim設定案（任意）"
+      label: "Suggested nazoplug spec / nazoplug設定案（任意）"
       description: |
         If you have a config in mind, paste it here. / 設定案があれば貼ってください。
       render: lua

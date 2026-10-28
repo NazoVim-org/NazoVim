@@ -22,7 +22,7 @@ return {
 			preset = {
 				keys = {
 					{ icon = "", desc = "New file", key = "e", action = ":enew" },
-					{ icon = "󰒲", desc = "Lazy", key = "z", action = ":Lazy" },
+					{ icon = "󰒲", desc = "Plugins", key = "z", action = ":NazoPlug" },
 					{ icon = "󰈙", desc = "Oil", key = ".", action = ":Oil" },
 					{ icon = "", desc = "Dotfiles", key = "d", action = ":Config" },
 					{

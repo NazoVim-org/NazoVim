@@ -3,6 +3,7 @@
   "ignorePaths": [],
   "words": [
     "nvim",
+    "nazoplug",
     "nazozokc",
     "nazovim",
     "Nazo",
@@ -42,6 +43,7 @@
     "Keymap",
     "Keymaps",
     "healthcheck",
+    "stdpath",
     "autocmds",
     "avante",
     "Avante",
