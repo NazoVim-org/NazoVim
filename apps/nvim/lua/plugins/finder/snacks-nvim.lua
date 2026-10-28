@@ -13,10 +13,11 @@ return {
 			enabled = true,
 			sections = {
 				{ section = "header" },
-				{ icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
-				{ icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
-				{ icon = " ", title = "Keymaps", section = "keys", indent = 2, padding = 1 },
-				{ section = "startup" },
+				{ icon = " ", title = "Recent Files", section = "recent_files", indent = 2, padding = 1 },
+				{ icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
+				{ icon = " ", title = "Keymaps", section = "keys", indent = 2, padding = 1 },
+				-- The startup section requires lazy.nvim's stats module
+				{ section = "startup", enabled = package.loaded.lazy ~= nil },
 			},
 			autokeys = "asdfghjklqwertyuiop",
 			preset = {
