@@ -151,6 +151,50 @@ function M.names(lock)
 	return names
 end
 
+-- Resolve the startup lock: locate the runtime lock, seed it from the config
+-- lock (or a legacy lazy-lock.json), and load it.
+function M.resolve_startup(opts)
+	opts = opts or {}
+	local data = vim.fn.stdpath("data")
+	local config = vim.fn.stdpath("config")
+	local lock_path = opts.lockfile or U.join(data, "nazoplug-lock.json")
+	local config_lock = opts.config_lock or U.join(config, "nazoplug-lock.json")
+
+	if not U.is_file(config_lock) then
+		local legacy_config = U.join(config, "lazy-lock.json")
+		if U.is_file(legacy_config) then
+			config_lock = legacy_config
+		end
+	end
+	if not U.is_file(lock_path) then
+		local legacy_data = U.join(data, "lazy-lock.json")
+		if not U.is_file(legacy_data) then
+			local fallback = U.join(vim.fn.fnamemodify(data, ":h"), "nvim/lazy-lock.json")
+			if U.is_file(fallback) then
+				legacy_data = fallback
+			end
+		end
+		if U.is_file(legacy_data) then
+			local copied, err = M.ensure_runtime_copy(legacy_data, lock_path)
+			if not copied then
+				U.warn("failed to copy legacy lock: " .. tostring(err))
+			end
+		elseif U.is_file(config_lock) then
+			local copied, err = M.ensure_runtime_copy(config_lock, lock_path)
+			if not copied then
+				U.warn("failed to copy config lock: " .. tostring(err))
+			end
+		end
+	end
+
+	local lock, err = M.load(lock_path)
+	if not lock then
+		U.error("failed to load lock: " .. tostring(err))
+		lock = {}
+	end
+	return lock_path, config_lock, lock
+end
+
 function M.count(lock)
 	local count = 0
 	for _ in pairs(lock) do

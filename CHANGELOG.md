@@ -3,6 +3,30 @@
 <!-- markdownlint-disable-file MD024 MD013 -->
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
 
+## [v2.0.0](https://github.com/NazoVim-org/NazoVim/releases/tag/v2.0.0) (2026-10-28)
+
+### What's Changed
+
+* refactor: split nazoplug into boot / spec_state / migrate modules by @nazozokc in #102
+* refactor: move legacy lock discovery into lock.resolve_startup by @nazozokc in #102
+* refactor: delegate runtime activation during build to loader by @nazozokc in #102
+* refactor: delegate nix package definitions to packages/nix/default.nix by @nazozokc in #102
+* refactor!: drop lazy.nvim compat layer and legacy fallbacks by @nazozokc in #102
+
+### Breaking Changes
+
+* `setup(opts, extra)` two-argument form removed; use `setup({ spec = ... })`
+* `opts.performance.rtp.disabled_plugins` removed; use `opts.disabled_plugins`
+* `opts.install.colorscheme` removed (configure the colorscheme via a plugin spec instead)
+* lazy.nvim fallback removed; `apps/nvim/init.lua` requires nazoplug unconditionally
+* Boot-time lazy→nazoplug auto-migration removed; run `:NazoPlug migrate` explicitly
+* `opts.old_pack_dir` removed; `:NazoPlug migrate` discovers the legacy directory itself
+* `NAZOVIM_PLUGIN_MANAGER` environment export removed
+
+**Full Changelog**: <https://github.com/NazoVim-org/NazoVim/compare/v1.2.0...v2.0.0>
+
+---
+
 ## [v1.1.2](https://github.com/NazoVim-org/NazoVim/releases/tag/v1.1.2) (2026-04-02)
 
 ### What's Changed

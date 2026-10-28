@@ -31,6 +31,8 @@ local G = require("nazoplug.git")
 local U = require("nazoplug.util")
 local tmp = vim.fn.tempname()
 vim.fn.mkdir(tmp, "p")
+vim.env.XDG_DATA_HOME = U.join(tmp, "data")
+vim.fn.mkdir(U.join(tmp, "data"), "p")
 
 local origin = U.join(tmp, "origin")
 vim.fn.mkdir(origin, "p")
@@ -48,7 +50,6 @@ test("commands registers NazoPlug and handles empty state", function()
 		lock = {},
 		lock_path = tmp .. "/lock.json",
 		pack_dir = tmp .. "/pack",
-		old_pack_dir = tmp .. "/old",
 	})
 	eq(vim.fn.exists(":NazoPlug"), 2)
 	eq(C.dispatch({ "check" }), true)
@@ -79,7 +80,6 @@ test("commands install selected plugin with its dependencies", function()
 		lock = {},
 		lock_path = U.join(tmp, "command-lock.json"),
 		pack_dir = pack_dir,
-		old_pack_dir = U.join(tmp, "command-old"),
 	})
 	eq(C.dispatch({ "install", "command-parent.nvim" }), true)
 	truthy(U.is_dir(by_name["command-parent.nvim"].dir))
@@ -100,7 +100,6 @@ test("commands clean removes orphan directories", function()
 		lock = {},
 		lock_path = U.join(tmp, "clean-lock.json"),
 		pack_dir = pack_dir,
-		old_pack_dir = U.join(tmp, "clean-old"),
 	})
 	eq(C.dispatch({ "clean", "--yes" }), true)
 	eq(U.exists(orphan), false)
@@ -116,7 +115,6 @@ test("commands migrate refreshes the in-memory lock", function()
 		lock = {},
 		lock_path = lock_path,
 		pack_dir = U.join(tmp, "migrate-state-pack"),
-		old_pack_dir = U.join(tmp, "migrate-state-old"),
 	})
 	eq(C.dispatch({ "migrate" }), true)
 	eq(C.state().lock["migrated.nvim"].commit, commit)

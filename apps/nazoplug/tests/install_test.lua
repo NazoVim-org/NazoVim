@@ -3,6 +3,7 @@ local S = require("nazoplug.spec")
 local L = require("nazoplug.lock")
 local G = require("nazoplug.git")
 local I = require("nazoplug.install")
+local MG = require("nazoplug.migrate")
 
 local passed, failed = 0, 0
 local failures = {}
@@ -41,6 +42,8 @@ end
 
 local tmp = vim.fn.tempname()
 vim.fn.mkdir(tmp, "p")
+vim.env.XDG_DATA_HOME = U.join(tmp, "data")
+vim.fn.mkdir(U.join(tmp, "data"), "p")
 local origin = U.join(tmp, "origin")
 local pack_dir = U.join(tmp, "pack")
 vim.fn.mkdir(origin, "p")
@@ -284,7 +287,7 @@ test("migrate preserves lock entries for missing plugins", function()
 	local missing = spec({ name = "missing.nvim" })
 	local path = U.join(tmp, "migrate-lock.json")
 	truthy(L.save(path, { ["missing.nvim"] = { branch = "main", commit = first } }))
-	local lock, migrated = I.migrate({ installed, missing }, { lock_path = path })
+	local lock, migrated = MG.migrate({ installed, missing }, { lock_path = path })
 	truthy(lock, migrated)
 	eq(lock["missing.nvim"].commit, first)
 	truthy(lock["migrated.nvim"])
@@ -303,10 +306,10 @@ test("migration marker reports up-to-date after migrate", function()
 	if U.exists(target.dir) then
 		truthy(vim.fn.delete(target.dir, "rf") == 0)
 	end
-	eq(I.migration_uptodate(old_pack_dir), false)
-	local _, migrated = I.migrate({ target }, { old_pack_dir = old_pack_dir })
+	eq(MG.uptodate(old_pack_dir), false)
+	local _, migrated = MG.migrate({ target }, { old_pack_dir = old_pack_dir })
 	truthy(vim.tbl_contains(migrated, "relocated.nvim"))
-	eq(I.migration_uptodate(old_pack_dir), true)
+	eq(MG.uptodate(old_pack_dir), true)
 end)
 
 test("lock save keeps install entries", function()

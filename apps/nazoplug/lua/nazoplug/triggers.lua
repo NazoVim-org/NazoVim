@@ -1,5 +1,5 @@
 local U = require("nazoplug.util")
-local S = require("nazoplug.spec")
+local S = require("nazoplug.spec_state")
 
 local M = {}
 
