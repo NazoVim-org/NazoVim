@@ -30,7 +30,7 @@
           # apps/nvim/ 以下の設定ファイルを Nix store にコピー
           nvimConfig = pkgs.stdenv.mkDerivation {
             pname = "nazovim";
-            version = "1.0.0";
+            version = "1.2.0";
             src = pkgs.lib.cleanSource ./apps/nvim;
             installPhase = ''
               mkdir -p $out/lua/nazoplug
