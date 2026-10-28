@@ -1,70 +1,68 @@
-# NazoVim Nix package
+# NazoVim package definitions
 #
-# This package extracts the Neovim config from apps/nvim/ and wraps it
-# with the necessary runtime inputs.
+# The Neovim config is extracted from apps/nvim/ (with the nazoplug runtime
+# merged in), and wrapped as a fully isolated NVIM_APPNAME launcher.
 #
-# The root flake.nix is the main entry point for `nix run github:NazoVim-org/NazoVim`.
-# This module provides the underlying package derivation that the flake references.
+# The root flake.nix wires these into `packages.default`, `packages.config`
+# and `apps.default` for `nix run github:NazoVim-org/NazoVim`.
 
 {
   pkgs,
-  lib,
+  version,
   configSrc,
-  nazoplugSrc ? null,
+  nazoplugSrc,
 }:
 
 let
-  config = if nazoplugSrc == null then configSrc else pkgs.runCommand "nazovim-config" { } ''
-    mkdir -p $out/lua/nazoplug
-    cp -r ${configSrc}/. $out/
-    cp -r ${nazoplugSrc}/. $out/lua/nazoplug/
-  '';
-  neovim_12 = pkgs.neovim.overrideAttrs (oldAttrs: {
-    version = "0.12.0";
-    src = pkgs.fetchFromGitHub {
-      owner = "neovim";
-      repo = "neovim";
-      rev = "v0.12.0";
-      hash = "sha256-uWhrGAwQ2nnAkyJ46qGkYxJ5K1jtyUIQOAVu3yTlquk=";
-    };
-  });
+  # apps/nvim/ 以下の設定ファイルを Nix store にコピー
+  nvimConfig = pkgs.stdenv.mkDerivation {
+    pname = "nazovim";
+    inherit version;
+    src = pkgs.lib.cleanSource configSrc;
+    installPhase = ''
+      mkdir -p $out/lua/nazoplug
+      cp -r . $out/
+      cp -r ${nazoplugSrc}/. $out/lua/nazoplug/
+    '';
+  };
+
+  # NVIM_APPNAME で完全隔離して起動する wrapped neovim
+  neovim = pkgs.wrapNeovim pkgs.neovim-unwrapped { };
+
+  nvim-nazozokc = pkgs.writeShellApplication {
+    name = "nvim";
+    runtimeInputs = [
+      neovim
+      pkgs.git
+      pkgs.gnumake
+      pkgs.nodejs_latest
+      pkgs.tree-sitter
+      pkgs.clang-tools # clangd
+      pkgs.jdt-language-server # jdtls
+      pkgs.ruby
+    ];
+    text = ''
+      APPNAME="nvim-nazozokc"
+      CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
+      DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
+      export NVIM_APPNAME="$APPNAME"
+      # symlink なら既存チェック不要、存在すれば上書き
+      if [ -L "$CONFIG_DIR" ]; then
+        rm "$CONFIG_DIR"
+      elif [ -d "$CONFIG_DIR" ]; then
+        rm -rf "$CONFIG_DIR"
+      fi
+      ln -s ${nvimConfig} "$CONFIG_DIR"
+      # プラグインのデータディレクトリを事前に作成
+      mkdir -p "$DATA_DIR"
+      # 初回起動時に Nix store の lockfile を data dir にコピー
+      if [ ! -f "$DATA_DIR/nazoplug-lock.json" ] && [ -f "$CONFIG_DIR/nazoplug-lock.json" ]; then
+        cp "$CONFIG_DIR/nazoplug-lock.json" "$DATA_DIR/nazoplug-lock.json"
+      fi
+      exec nvim "$@"
+    '';
+  };
 in
 {
-  packages = {
-    # nix build → result/bin/nvim
-    default = pkgs.writeShellApplication {
-      name = "nvim";
-      runtimeInputs = [
-        neovim_12
-        pkgs.git
-        pkgs.gnumake
-        pkgs.nodejs_latest
-        pkgs.tree-sitter
-        pkgs.clang-tools
-        pkgs.jdt-language-server
-        pkgs.ruby
-      ];
-      text = ''
-        APPNAME="nvim-nazozokc"
-        CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
-        DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
-        export NVIM_APPNAME="$APPNAME"
-        export NAZOVIM_PLUGIN_MANAGER="nazoplug"
-        if [ -L "$CONFIG_DIR" ]; then
-          rm "$CONFIG_DIR"
-        elif [ -d "$CONFIG_DIR" ]; then
-          rm -rf "$CONFIG_DIR"
-        fi
-        ln -s ${config} "$CONFIG_DIR"
-        mkdir -p "$DATA_DIR"
-        if [ ! -f "$DATA_DIR/nazoplug-lock.json" ] && [ -f "$CONFIG_DIR/nazoplug-lock.json" ]; then
-          cp "$CONFIG_DIR/nazoplug-lock.json" "$DATA_DIR/nazoplug-lock.json"
-        fi
-        exec nvim "$@"
-      '';
-    };
-
-    # nix build .#config → 設定ファイル一式
-    config = config;
-  };
+  inherit nvimConfig nvim-nazozokc;
 }

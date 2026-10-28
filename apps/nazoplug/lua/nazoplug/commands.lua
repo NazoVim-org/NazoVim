@@ -2,7 +2,7 @@ local U = require("nazoplug.util")
 local L = require("nazoplug.lock")
 local G = require("nazoplug.git")
 local I = require("nazoplug.install")
-local S = require("nazoplug.spec")
+local S = require("nazoplug.spec_state")
 
 local M = {}
 
@@ -318,8 +318,8 @@ local function cmd_clean(args)
 end
 
 local function cmd_migrate()
-	local lock, migrated = I.migrate(state.specs, {
-		old_pack_dir = state.old_pack_dir,
+	local MG = require("nazoplug.migrate")
+	local lock, migrated = MG.migrate(state.specs, {
 		lock_path = state.lock_path,
 		strict = false,
 	})

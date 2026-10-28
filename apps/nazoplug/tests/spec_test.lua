@@ -1,5 +1,6 @@
 local U = require("nazoplug.util")
 local S = require("nazoplug.spec")
+local SS = require("nazoplug.spec_state")
 local L = require("nazoplug.lock")
 
 local passed, failed = 0, 0
@@ -65,11 +66,11 @@ test("spec preserves conditional enabled and cond", function()
 	}, { pack_dir = pack_dir })
 	local spec = by_name["conditional.nvim"]
 	eq(spec.enabled, enabled)
-	eq(S.is_enabled(spec), false)
+	eq(SS.is_enabled(spec), false)
 	spec.enabled = true
-	eq(S.is_enabled(spec), false)
+	eq(SS.is_enabled(spec), false)
 	spec.cond = true
-	eq(S.is_enabled(spec), true)
+	eq(SS.is_enabled(spec), true)
 end)
 
 test("spec preserves exact tag and pin", function()
@@ -127,7 +128,7 @@ test("spec resolves main by normalized name", function()
 	local spec = S.collect({ "owner/nvim-treesitter" }, { pack_dir = pack_dir })[1]
 	truthy(U.write_file(U.join(spec.dir, "lua/nvim-treesitter.lua"), "return {}\n"))
 	truthy(U.write_file(U.join(spec.dir, "lua/nvim-treesitter/configs.lua"), "return {}\n"))
-	eq(S.resolve_main(spec), "nvim-treesitter")
+	eq(SS.resolve_main(spec), "nvim-treesitter")
 end)
 
 test("lock saves sorted json and loads it", function()

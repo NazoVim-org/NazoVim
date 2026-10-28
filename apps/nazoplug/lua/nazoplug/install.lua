@@ -15,29 +15,9 @@ local function as_commands(build)
 end
 
 local function source_plugin(spec)
-	local rtp = vim.opt.runtimepath:get()
-	if not vim.tbl_contains(rtp, spec.dir) then
-		vim.opt.runtimepath:prepend(spec.dir)
-	end
-	local after_dir = U.join(spec.dir, "after")
-	if U.is_dir(after_dir) and not vim.tbl_contains(vim.opt.runtimepath:get(), after_dir) then
-		vim.opt.runtimepath:append(after_dir)
-	end
-	for _, sub in ipairs({ "plugin", "after/plugin" }) do
-		local dir = U.join(spec.dir, sub)
-		if U.is_dir(dir) then
-			for _, file in
-				ipairs(U.list_files(dir, function(path)
-					return path:match("%.vim$") ~= nil or path:match("%.lua$") ~= nil
-				end))
-			do
-				local ok, err = pcall(vim.cmd, "source " .. vim.fn.fnameescape(file))
-				if not ok then
-					return nil, err
-				end
-			end
-		end
-	end
+	local loader = require("nazoplug.loader")
+	loader.add_to_rtp(spec)
+	loader.packadd(spec.dir)
 	return true
 end
 
@@ -436,78 +416,6 @@ function M.check(spec, lock)
 		end
 	end
 	return true, head
-end
-
-function M.migration_uptodate(old_pack_dir)
-	local marker = U.join(old_pack_dir, ".nazoplug-migrated")
-	local mstat = vim.uv.fs_stat(marker)
-	if not mstat then
-		return false
-	end
-	local dstat = vim.uv.fs_stat(old_pack_dir)
-	if not dstat then
-		return false
-	end
-	if
-		dstat.mtime.sec > mstat.mtime.sec
-		or (dstat.mtime.sec == mstat.mtime.sec and dstat.mtime.nsec > mstat.mtime.nsec)
-	then
-		return false
-	end
-	return true
-end
-
-function M.mark_migrated(old_pack_dir)
-	local marker = U.join(old_pack_dir, ".nazoplug-migrated")
-	local ok, err = U.write_atomic(marker, "migrated\n")
-	if not ok then
-		U.warn("failed to write migration marker: " .. tostring(err))
-	end
-end
-
-function M.migrate(specs, opts)
-	opts = opts or {}
-	local lock = {}
-	if opts.lock_path then
-		local existing, err = L.load(opts.lock_path)
-		if existing then
-			lock = existing
-		elseif opts.strict then
-			return nil, err
-		end
-	end
-	local migrated = {}
-	for _, spec in ipairs(specs) do
-		if not U.exists(spec.dir) and opts.old_pack_dir then
-			local old_dir = U.join(opts.old_pack_dir, spec.name)
-			if G.is_repo(old_dir) then
-				vim.fn.mkdir(U.dirname(spec.dir), "p")
-				local ok, err = pcall(vim.uv.fs_symlink, old_dir, spec.dir)
-				if not ok then
-					return nil, string.format("symlink failed for %s: %s", spec.name, err)
-				end
-				migrated[#migrated + 1] = spec.name
-			end
-		end
-		if (opts.lock_path or opts.collect) and G.is_repo(spec.dir) then
-			local entry, err = M.entry(spec)
-			if entry then
-				lock[spec.name] = entry
-			elseif opts.strict then
-				return nil, string.format("failed to read %s: %s", spec.name, err)
-			end
-		end
-	end
-	if opts.lock_path then
-		local ok, err = L.save(opts.lock_path, lock)
-		if not ok then
-			return nil, err
-		end
-	end
-	if opts.old_pack_dir then
-		M.mark_migrated(opts.old_pack_dir)
-	end
-	return lock, migrated
 end
 
 return M
