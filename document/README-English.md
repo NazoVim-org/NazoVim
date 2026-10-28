@@ -108,7 +108,8 @@ nvim
 ```
 
 After the first launch, run `:NazoPlug install` to install missing plugins.
-If you have an existing lazy.nvim setup, run `:NazoPlug migrate` to reuse its data directory.
+If you have an existing lazy.nvim setup,
+run `:NazoPlug migrate` to reuse its data directory.
 
 > For development, clone the full repository instead:
 > `git clone https://github.com/NazoVim-org/NazoVim.git`

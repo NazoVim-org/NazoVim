@@ -1,7 +1,8 @@
 # Neovim Configuration
 
 このディレクトリは NazoVim-org/NazoVim リポジトリの Neovim 設定です。  
-自作プラグインマネージャー `nazoplug`（`apps/nazoplug/`）を使用しています。`init.lua` は `NAZOVIM_PLUGIN_MANAGER=lazy` のときだけ lazy.nvim にフォールバックします。
+自作プラグインマネージャー `nazoplug`（`apps/nazoplug/`）を使用しています。
+`init.lua` は `NAZOVIM_PLUGIN_MANAGER=lazy` のときだけ lazy.nvim にフォールバックします。
 
 ---
 
@@ -50,7 +51,8 @@
 ## プラグイン管理
 
 `:NazoPlug` で操作します。設定は `apps/nvim/nazoplug-lock.json`、実行時データは
-`stdpath("data")/site/pack/nazoplug/opt` と `stdpath("data")/nazoplug-lock.json` です。
+`stdpath("data")/site/pack/nazoplug/opt` と
+`stdpath("data")/nazoplug-lock.json` です。
 spec は lazy.nvim 互換で、`tag` / `pin` / `cond` / 関数形式の `enabled` に対応します。
 
 ```vim
