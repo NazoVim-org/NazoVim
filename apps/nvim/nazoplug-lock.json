@@ -187,6 +187,14 @@
 		"branch": "master",
 		"commit": "47f91c416daef12db467145e16bed5bbfe00add8"
 	},
+	"mega.cmdparse": {
+		"branch": "main",
+		"commit": "47ea5b1b23059fbb79a8e262002f32e7cd8aed90"
+	},
+	"mega.logging": {
+		"branch": "main",
+		"commit": "194ad8c300186e73c3eb1ebeb3ede42eb219be3b"
+	},
 	"marks.nvim": {
 		"branch": "master",
 		"commit": "f353e8c08c50f39e99a9ed474172df7eddd89b72"
