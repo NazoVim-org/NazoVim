@@ -1,4 +1,5 @@
 local U = require("nazoplug.util")
+local A = require("nazoplug.async")
 
 local M = {}
 
@@ -21,15 +22,17 @@ end
 function M.run(args, opts)
 	opts = opts or {}
 	local command = git_args(opts.cwd, args)
-	local ok, process = pcall(vim.system, command, {
+	local result, err = A.system(command, {
 		cwd = opts.cwd,
 		text = true,
 		timeout = opts.timeout or 60000,
 	})
-	if not ok then
-		return nil, tostring(process)
+	if err then
+		return nil, tostring(err)
 	end
-	local result = process:wait()
+	if not result then
+		return nil, "git process was aborted"
+	end
 	if result.code ~= 0 then
 		local message = trim(result.stderr)
 		if message == "" then

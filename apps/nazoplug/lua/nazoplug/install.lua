@@ -1,6 +1,7 @@
 local U = require("nazoplug.util")
 local G = require("nazoplug.git")
 local L = require("nazoplug.lock")
+local A = require("nazoplug.async")
 
 local M = {}
 
@@ -48,15 +49,14 @@ function M.build(spec, opts)
 				end
 			else
 				local shell = vim.o.shell
-				local ok, process = pcall(vim.system, { shell, "-c", cmd }, {
+				local result, err = A.system({ shell, "-c", cmd }, {
 					cwd = spec.dir,
 					text = true,
 					timeout = opts.build_timeout or 300000,
 				})
-				if not ok then
-					return nil, string.format("build failed for %s: %s", spec.name, process)
+				if err or not result then
+					return nil, string.format("build failed for %s: %s", spec.name, err or "process was aborted")
 				end
-				local result = process:wait()
 				if result.code ~= 0 then
 					local message = U.trim(result.stderr)
 					if message == "" then
@@ -248,6 +248,9 @@ function M.prefetch(specs, opts)
 					pump()
 				end)
 			end
+			if opts.on_progress then
+				opts.on_progress(spec, "prefetch")
+			end
 			local ok, process = pcall(vim.system, G.clone_command(spec, { branch = clone_branch }), {
 				text = true,
 				timeout = timeout,
@@ -275,6 +278,52 @@ function M.prefetch(specs, opts)
 	return #errors == 0, errors
 end
 
+-- Detect a dependency cycle before concurrent installation: worker-based
+-- visiting cannot rely on a serial DFS. Colors: nil = unvisited, 1 = in
+-- progress, 2 = done.
+local function detect_cycle(specs, by_name)
+	local color = {}
+	local stack = {}
+	local function walk(spec)
+		color[spec.name] = 1
+		stack[#stack + 1] = spec.name
+		for _, dependency_name in ipairs(spec.dependencies or {}) do
+			local dependency = by_name[dependency_name]
+			if dependency then
+				if color[dependency.name] == 1 then
+					local from = 1
+					for index, name in ipairs(stack) do
+						if name == dependency.name then
+							from = index
+							break
+						end
+					end
+					local cycle = table.concat(vim.list_slice(stack, from), " -> ")
+					return "dependency cycle: " .. cycle .. " -> " .. dependency.name
+				end
+				if color[dependency.name] == nil then
+					local err = walk(dependency)
+					if err then
+						return err
+					end
+				end
+			end
+		end
+		stack[#stack] = nil
+		color[spec.name] = 2
+		return nil
+	end
+	for _, spec in ipairs(specs) do
+		if color[spec.name] == nil then
+			local err = walk(spec)
+			if err then
+				return err
+			end
+		end
+	end
+	return nil
+end
+
 function M.install(specs, lock, opts)
 	opts = opts or {}
 	lock = lock or {}
@@ -288,68 +337,150 @@ function M.install(specs, lock, opts)
 	for _, spec in ipairs(specs) do
 		by_name[spec.name] = spec
 	end
-	local visited = {}
-	local visiting = {}
 	local results = {}
 	local failed = {}
 
-	local function visit(spec)
-		if visited[spec.name] then
-			return true
+	local cycle_err = detect_cycle(specs, by_name)
+	if cycle_err then
+		return false, results, failed, cycle_err
+	end
+
+	-- Per-plugin state for cross-worker dependency coordination.
+	local states = {} -- name -> "running" | "done" | "failed"
+	local recorded = {} -- name -> true (row already appended)
+	local waiters = {} -- [co] = spec the worker is parked on
+
+	local function record(spec, ok, err)
+		if recorded[spec.name] then
+			return
 		end
-		if visiting[spec.name] then
-			return nil, "dependency cycle involving " .. spec.name
+		recorded[spec.name] = true
+		results[#results + 1] = { name = spec.name, ok = ok, err = err }
+		if not ok then
+			failed[#failed + 1] = spec.name
 		end
-		visiting[spec.name] = true
+	end
+
+	local function deps_terminal(spec)
+		for _, dependency_name in ipairs(spec.dependencies or {}) do
+			local dependency = by_name[dependency_name]
+			if dependency and states[dependency.name] ~= "done" and states[dependency.name] ~= "failed" then
+				return false
+			end
+		end
+		return true
+	end
+
+	local function wake_waiters()
+		local ready = {}
+		for co, spec in pairs(waiters) do
+			if deps_terminal(spec) then
+				ready[#ready + 1] = co
+			end
+		end
+		for _, co in ipairs(ready) do
+			waiters[co] = nil
+			coroutine.resume(co)
+		end
+	end
+
+	-- Ensure a spec and its dependency subtree. Runs inside a pool worker
+	-- coroutine; parks (yields) while dependencies are being installed by
+	-- other workers and at every subprocess boundary. Returns (ok, err, kind):
+	-- kind == "skip" means the row is already recorded.
+	local function ensure_tree(spec)
+		while true do
+			local state = states[spec.name]
+			if state == "done" then
+				return true, nil, "skip"
+			end
+			if state == "failed" then
+				return false, "dependency failed: " .. spec.name, "skip"
+			end
+			if state == "running" then
+				waiters[coroutine.running()] = spec
+				coroutine.yield()
+			else
+				break
+			end
+		end
+		states[spec.name] = "running"
+
 		for _, dependency_name in ipairs(spec.dependencies or {}) do
 			local dependency = by_name[dependency_name]
 			if dependency then
-				local ok, err = visit(dependency)
-				if not ok then
-					visiting[spec.name] = nil
-					return nil, err
+				ensure_tree(dependency)
+				if states[dependency.name] == "failed" then
+					return false, "dependency failed: " .. dependency.name, "skip"
 				end
 			end
 		end
+
 		if opts.on_progress then
 			opts.on_progress(spec, "start")
 		end
 		local ensure_opts = vim.tbl_extend("force", {}, opts)
 		ensure_opts.lock = lock
 		local entry, err = M.ensure(spec, ensure_opts)
-		visiting[spec.name] = nil
 		if not entry then
-			failed[#failed + 1] = spec.name
-			results[#results + 1] = { name = spec.name, ok = false, err = err }
+			states[spec.name] = "failed"
+			record(spec, false, err)
 			if opts.on_progress then
 				opts.on_progress(spec, "error", err)
 			end
-			return nil, err
+			return false, err, "skip"
 		end
 		local set_ok, set_err = L.set(lock, spec.name, entry)
 		if not set_ok then
-			failed[#failed + 1] = spec.name
-			results[#results + 1] = { name = spec.name, ok = false, err = set_err }
-			return nil, set_err
+			states[spec.name] = "failed"
+			record(spec, false, set_err)
+			return false, set_err, "skip"
 		end
-		visited[spec.name] = true
+		states[spec.name] = "done"
 		local build_ok = err == nil
-		results[#results + 1] = { name = spec.name, ok = build_ok, err = err }
-		if not build_ok then
-			failed[#failed + 1] = spec.name
-		end
+		record(spec, build_ok, err)
 		if opts.on_progress then
 			opts.on_progress(spec, build_ok and "done" or "build_error", err)
 		end
-		return true
+		return build_ok, err, "skip"
 	end
 
+	local pool = require("nazoplug.pool")
+	local tasks = {}
 	for _, spec in ipairs(specs) do
-		local ok, err = visit(spec)
-		if not ok and opts.stop_on_error then
-			return false, results, failed, err
+		tasks[#tasks + 1] = function()
+			return ensure_tree(spec)
 		end
 	end
+	pool.run(tasks, {
+		concurrency = opts.concurrency or 8,
+		stop_on_error = opts.stop_on_error,
+		on_result = function(idx, ok, err, extra)
+			local spec = specs[idx]
+			if not spec then
+				return
+			end
+			if states[spec.name] == "running" then
+				-- worker crashed before recording its state
+				states[spec.name] = ok and "done" or "failed"
+			end
+			wake_waiters()
+			if extra == "skip" then
+				-- rows and progress were handled inside the worker
+				if not ok and not recorded[spec.name] and opts.on_progress then
+					opts.on_progress(spec, "error", err)
+				end
+				return
+			end
+		-- unrecorded result (e.g. timed out): record it here
+		if not recorded[spec.name] then
+			record(spec, ok, err)
+		end
+			if not ok and opts.on_progress then
+				opts.on_progress(spec, "error", err)
+			end
+		end,
+	})
 
 	if opts.lock_path and opts.save ~= false then
 		local ok, err = L.save(opts.lock_path, lock)
