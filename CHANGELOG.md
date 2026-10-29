@@ -3,25 +3,33 @@
 <!-- markdownlint-disable-file MD024 MD013 -->
 <!-- markdownlint-configure-file { "MD024": { "siblings_only": true } } -->
 
-## [v2.0.0](https://github.com/NazoVim-org/NazoVim/releases/tag/v2.0.0) (2026-10-28)
+## [v2.0.0](https://github.com/NazoVim-org/NazoVim/releases/tag/v2.0.0) (2026-10-29)
+
+NazoVim 2.0 introduces **nazoplug**, a built-in plugin manager with lazy loading, concurrent installation, and a live progress UI. This release also adds Avante AI integration and reorganizes the repository into a monorepo.
 
 ### What's Changed
 
-* refactor: split nazoplug into boot / spec_state / migrate modules by @nazozokc in #102
-* refactor: move legacy lock discovery into lock.resolve_startup by @nazozokc in #102
-* refactor: delegate runtime activation during build to loader by @nazozokc in #102
-* refactor: delegate nix package definitions to packages/nix/default.nix by @nazozokc in #102
-* refactor!: drop lazy.nvim compat layer and legacy fallbacks by @nazozokc in #102
+* **Built-in plugin management:** manage installation, updates, lockfile restoration, cleanup, and build hooks with `:NazoPlug`. Plugin specs support tags, pinned versions, conditions, and function-based enablement. ([#98](https://github.com/NazoVim-org/NazoVim/pull/98))
+* **Concurrent installation and progress UI:** install plugins with bounded concurrency and dependency coordination, follow progress in a floating window, and open `:NazoPlug` without arguments to browse plugin status, branches, and commits. ([#103](https://github.com/NazoVim-org/NazoVim/pull/103))
+* **Avante AI integration:** add an AI coding assistant with sidebar chat and editing workflows. ([#86](https://github.com/NazoVim-org/NazoVim/pull/86))
+* **Faster startup:** improve lazy loading and cache plugin specs to reduce startup work. ([#87](https://github.com/NazoVim-org/NazoVim/pull/87), [#98](https://github.com/NazoVim-org/NazoVim/pull/98))
+* **Nix launcher improvements:** link configuration from the Nix store instead of copying it on every launch, while keeping runtime lockfiles in the writable data directory. ([#88](https://github.com/NazoVim-org/NazoVim/pull/88))
+* **Monorepo layout:** organize Neovim configuration under `apps/nvim/`, nazoplug under `apps/nazoplug/`, and Nix package definitions under `packages/nix/`. Separate nazoplug boot, spec state, and migration responsibilities. ([#94](https://github.com/NazoVim-org/NazoVim/pull/94), [#98](https://github.com/NazoVim-org/NazoVim/pull/98), [#102](https://github.com/NazoVim-org/NazoVim/pull/102))
 
-### Breaking Changes
+### Bug Fixes
 
-* `setup(opts, extra)` two-argument form removed; use `setup({ spec = ... })`
-* `opts.performance.rtp.disabled_plugins` removed; use `opts.disabled_plugins`
-* `opts.install.colorscheme` removed (configure the colorscheme via a plugin spec instead)
-* lazy.nvim fallback removed; `apps/nvim/init.lua` requires nazoplug unconditionally
-* Boot-time lazy→nazoplug auto-migration removed; run `:NazoPlug migrate` explicitly
-* `opts.old_pack_dir` removed; `:NazoPlug migrate` discovers the legacy directory itself
-* `NAZOVIM_PLUGIN_MANAGER` environment export removed
+* Fix missing branch and commit information in the plugin browser, and stabilize progress rendering during asynchronous operations. ([#103](https://github.com/NazoVim-org/NazoVim/pull/103))
+* Fix Treesitter parser incompatibility with the bundled Neovim version and replace removed Nix `nodePackages` references. ([#101](https://github.com/NazoVim-org/NazoVim/pull/101))
+* Add Avante's missing `mega.cmdparse` dependency. ([#100](https://github.com/NazoVim-org/NazoVim/pull/100))
+* Disable the lazy.nvim-only dashboard startup statistics section when using nazoplug. ([#99](https://github.com/NazoVim-org/NazoVim/pull/99))
+* Correct duplicate keymaps, LSP enablement, and inconsistent plugin disabling. ([#89](https://github.com/NazoVim-org/NazoVim/pull/89), [#92](https://github.com/NazoVim-org/NazoVim/pull/92))
+
+### Breaking Changes and Migration
+
+* **nazoplug is now required.** The lazy.nvim fallback and `NAZOVIM_PLUGIN_MANAGER` environment export have been removed. Use `:NazoPlug` for plugin management.
+* **Migration is explicit.** To reuse an existing lazy.nvim plugin data directory, run `:NazoPlug migrate`; boot-time automatic migration has been removed. The command discovers the legacy directory itself, so `opts.old_pack_dir` is no longer supported.
+* **Custom nazoplug setup options have changed:** replace `setup(opts, extra)` with `setup({ spec = ..., ... })`, move `opts.performance.rtp.disabled_plugins` to `opts.disabled_plugins`, and configure the colorscheme through a plugin spec instead of `opts.install.colorscheme`.
+* **Manual installations must account for the monorepo layout.** Include both `apps/nvim/` and `apps/nazoplug/` when using sparse checkout. Follow the updated [installation instructions](https://github.com/NazoVim-org/NazoVim/blob/v2.0.0/README.md) when adapting an existing checkout or configuration symlink.
 
 **Full Changelog**: <https://github.com/NazoVim-org/NazoVim/compare/v1.2.0...v2.0.0>
 
