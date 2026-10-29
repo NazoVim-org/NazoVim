@@ -160,6 +160,7 @@ function M.run(opts)
 		lock = lock,
 		lock_path = lock_path,
 		pack_dir = pack_dir,
+		concurrency = opts.concurrency,
 	})
 	require("nazoplug.health").setup({
 		specs = specs,

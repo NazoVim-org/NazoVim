@@ -63,6 +63,7 @@ end
 
 local function run_install(specs, opts)
 	local lock = state.lock
+	local progress = require("nazoplug.ui").start_progress(opts.ui_title or "NazoPlug sync")
 	local ok, results, failed, err = I.install(
 		specs,
 		lock,
@@ -70,8 +71,13 @@ local function run_install(specs, opts)
 			lock_path = state.lock_path,
 			save = true,
 			by_name = state.by_name,
+			concurrency = state.concurrency,
+			on_progress = function(spec, phase, perr)
+				progress.push(spec.name, phase, perr)
+			end,
 		}, opts or {})
 	)
+	progress.finish(#(results or {}) - #(failed or {}), #(failed or {}))
 	if not ok and err then
 		notify(err, vim.log.levels.ERROR)
 	end
@@ -213,14 +219,18 @@ local function cmd_build(args)
 		notify(err, vim.log.levels.ERROR)
 		return
 	end
+	local progress = require("nazoplug.ui").start_progress("NazoPlug build")
 	local failed = 0
 	for _, spec in ipairs(specs) do
+		progress.push(spec.name, "start")
 		local ok, build_err = I.build(spec, {})
+		progress.push(spec.name, ok and "done" or "error", build_err)
 		if not ok then
 			failed = failed + 1
 			notify(build_err, vim.log.levels.ERROR)
 		end
 	end
+	progress.finish(#specs - failed, failed)
 	notify(failed == 0 and "build complete" or string.format("%d build(s) failed", failed))
 	return failed == 0
 end
@@ -231,29 +241,37 @@ local function cmd_restore(args)
 		notify(err, vim.log.levels.ERROR)
 		return
 	end
+	local progress = require("nazoplug.ui").start_progress("NazoPlug restore")
 	local failed = 0
 	for _, spec in ipairs(specs) do
 		local entry = state.lock[spec.name]
 		if entry and entry.commit then
 			if G.is_repo(spec.dir) then
+				progress.push(spec.name, "start")
+				local ok, restore_err = true, nil
 				if not vim.tbl_contains(args, "--offline") then
-					local ok, fetch_err = G.fetch(spec.dir, {})
+					ok, restore_err = G.fetch(spec.dir, {})
 					if not ok then
-						failed = failed + 1
-						notify(string.format("%s: %s", spec.name, fetch_err), vim.log.levels.ERROR)
+						ok = false
 					end
 				end
-				local ok, checkout_err = G.checkout(spec.dir, entry.commit, { submodules = spec.submodules })
-				if not ok then
+				local ok2, checkout_err = G.checkout(spec.dir, entry.commit, { submodules = spec.submodules })
+				if ok and ok2 then
+					progress.push(spec.name, "done")
+				else
+					local restore_message = restore_err or checkout_err
+					progress.push(spec.name, "error", restore_message)
 					failed = failed + 1
-					notify(string.format("%s: %s", spec.name, checkout_err), vim.log.levels.ERROR)
+					notify(string.format("%s: %s", spec.name, restore_message), vim.log.levels.ERROR)
 				end
 			else
+				progress.push(spec.name, "error", "not installed")
 				failed = failed + 1
 				notify(string.format("%s: not installed", spec.name), vim.log.levels.ERROR)
 			end
 		end
 	end
+	progress.finish(#specs - failed, failed)
 	notify(failed == 0 and "restore complete" or string.format("%d restore(s) failed", failed))
 	return failed == 0
 end
@@ -347,8 +365,7 @@ local handlers = {
 function M.dispatch(args)
 	local command = args[1]
 	if not command then
-		notify("usage: :NazoPlug {sync|install|update|check|status|build|restore|clean|migrate}")
-		return
+		return require("nazoplug.ui").browse(state)
 	end
 	local handler = handlers[command]
 	if not handler then
