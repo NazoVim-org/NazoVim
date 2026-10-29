@@ -63,22 +63,32 @@ function M.system(command, opts)
 	return proc:wait(), nil
 end
 
--- Resume a parked worker whose process finished; delivers the task's final
--- return values to its registered completion callback.
+-- Resume a worker coroutine and, if it finished, deliver its return values
+-- to the registered completion callback. Used for process wakes and for
+-- workers parked by external coordination (dependency waits).
+function M.resume(co)
+	local success, r1, r2, r3 = coroutine.resume(co)
+	if coroutine.status(co) == "dead" then
+		local cb = completions[co]
+		completions[co] = nil
+		if cb then
+			if success then
+				cb(true, r1, r2, r3)
+			else
+				cb(false, r1)
+			end
+		end
+	end
+end
+
+-- Wake a worker whose process finished.
 function M.wake(co)
 	local waiter = waiting[co]
 	if not waiter or not waiter.done then
 		return
 	end
 	waiting[co] = nil
-	local success, r1, r2 = coroutine.resume(co)
-	if coroutine.status(co) == "dead" then
-		local cb = completions[co]
-		completions[co] = nil
-		if cb then
-			cb(success, r1, r2)
-		end
-	end
+	M.resume(co)
 end
 
 function M.on_complete(co, cb)
@@ -98,12 +108,7 @@ function M.abort(co)
 	end
 	waiter.done = true
 	waiting[co] = nil
-	local cb = completions[co]
-	completions[co] = nil
-	local success, r1, r2 = coroutine.resume(co)
-	if coroutine.status(co) == "dead" and cb then
-		cb(success, r1, r2)
-	end
+	M.resume(co)
 end
 
 return M

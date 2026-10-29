@@ -61,7 +61,7 @@ local function open_float(width, height, opts)
 	vim.bo[buf].modifiable = true
 	local row = math.max(1, math.floor((vim.o.lines - height) / 2))
 	local col = math.max(1, math.floor((vim.o.columns - width) / 2))
-	local win = vim.api.nvim_open_win(buf, false, {
+	local win = vim.api.nvim_open_win(buf, opts.enter == true, {
 		relative = "editor",
 		width = width,
 		height = height,
@@ -133,8 +133,9 @@ function M.start_progress(title)
 	end
 
 	local timer = vim.uv.new_timer()
-	timer:start(0, 90, function()
-		tick = tick + 1
+	local scheduled = false
+	local function frame()
+		scheduled = false
 		local animating = false
 		for _, name in ipairs(order) do
 			local phase = rows[name].phase
@@ -146,7 +147,25 @@ function M.start_progress(title)
 		if dirty or animating then
 			dirty = false
 			pcall(render)
-			vim.cmd.redraw()
+			pcall(vim.cmd.redraw)
+		end
+	end
+	timer:start(0, 90, function()
+		tick = tick + 1
+		if scheduled then
+			return
+		end
+		local animating = false
+		for _, name in ipairs(order) do
+			local phase = rows[name].phase
+			if phase == "start" or phase == "prefetch" then
+				animating = true
+				break
+			end
+		end
+		if dirty or animating then
+			scheduled = true
+			vim.schedule(frame)
 		end
 	end)
 
@@ -170,7 +189,12 @@ function M.start_progress(title)
 		if win and vim.api.nvim_win_is_valid(win) then
 			pcall(vim.api.nvim_win_close, win, true)
 		end
+		self.win = nil
+		self.buf = nil
 	end
+
+	self.win = win
+	self.buf = buf
 
 	function self.finish(_ok_count, fail_count)
 		vim.defer_fn(function()
@@ -192,27 +216,23 @@ function M.browse(plugins_state)
 	local by_name = plugins_state.by_name or {}
 	local lock = plugins_state.lock or {}
 	local width, height = 80, 20
-	local buf, win = open_float(width, height)
+	local buf, win = open_float(width, height, { enter = true })
+
+	local sorted = vim.deepcopy(specs)
+	table.sort(sorted, function(a, b)
+		return a.name < b.name
+	end)
 
 	local info = {} -- name -> { repo, branch, commit }
-	local dirty = true
 
 	local function render()
-		local sorted = vim.deepcopy(specs)
-		table.sort(sorted, function(a, b)
-			return a.name < b.name
-		end)
 		local lines = { " NazoPlug  plugins: " .. #sorted .. "  (q close, R refresh, u update, i install)", "" }
 		local highlights = { { "Title", 0, 0, -1 } }
 		for _, spec in ipairs(sorted) do
 			local entry = info[spec.name] or {}
-			local icon, hl
+			local icon, hl = ICONS.pending, HL.pending
 			if entry.repo then
 				icon, hl = ICONS.done, HL.done
-			elseif entry.repo == false then
-				icon, hl = ICONS.pending, HL.pending
-			else
-				icon, hl = ICONS.pending, HL.pending
 			end
 			local text = string.format(
 				" %s %-28s %-10s %-9s %s",
@@ -256,38 +276,17 @@ function M.browse(plugins_state)
 				end
 			end
 		end
-		dirty = true
-	end
-
-	local function pump()
-		if not dirty then
-			return
-		end
-		dirty = false
 		pcall(render)
-		vim.cmd.redraw()
+		pcall(vim.cmd.redraw)
 	end
-
-	local timer = vim.uv.new_timer()
-	timer:start(0, 200, function()
-		pump()
-	end)
 
 	local function close()
-		pcall(function()
-			timer:stop()
-			timer:close()
-		end)
 		if win and vim.api.nvim_win_is_valid(win) then
 			pcall(vim.api.nvim_win_close, win, true)
 		end
 	end
 
 	local function plugin_at(line)
-		local sorted = vim.deepcopy(specs)
-		table.sort(sorted, function(a, b)
-			return a.name < b.name
-		end)
 		local index = line - 2 -- header + blank
 		local spec = sorted[index]
 		if not spec then
@@ -298,7 +297,7 @@ function M.browse(plugins_state)
 
 	local function act(command)
 		local current_line = vim.api.nvim_win_get_cursor(win)[1]
-		local name, spec = plugin_at(current_line)
+		local name = plugin_at(current_line)
 		if not name then
 			return
 		end
@@ -317,7 +316,7 @@ function M.browse(plugins_state)
 	end, { buffer = buf, silent = true })
 
 	refresh()
-	pump()
+	return { buf = buf, win = win, close = close, refresh = refresh }
 end
 
 return M

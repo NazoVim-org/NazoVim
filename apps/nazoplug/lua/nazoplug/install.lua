@@ -361,26 +361,18 @@ function M.install(specs, lock, opts)
 		end
 	end
 
-	local function deps_terminal(spec)
-		for _, dependency_name in ipairs(spec.dependencies or {}) do
-			local dependency = by_name[dependency_name]
-			if dependency and states[dependency.name] ~= "done" and states[dependency.name] ~= "failed" then
-				return false
-			end
-		end
-		return true
-	end
-
+	-- Wake workers parked on a dependency that has reached a terminal state.
 	local function wake_waiters()
 		local ready = {}
 		for co, spec in pairs(waiters) do
-			if deps_terminal(spec) then
+			local state = states[spec.name]
+			if state == "done" or state == "failed" then
 				ready[#ready + 1] = co
 			end
 		end
 		for _, co in ipairs(ready) do
 			waiters[co] = nil
-			coroutine.resume(co)
+			A.resume(co)
 		end
 	end
 
@@ -428,12 +420,14 @@ function M.install(specs, lock, opts)
 			if opts.on_progress then
 				opts.on_progress(spec, "error", err)
 			end
+			wake_waiters()
 			return false, err, "skip"
 		end
 		local set_ok, set_err = L.set(lock, spec.name, entry)
 		if not set_ok then
 			states[spec.name] = "failed"
 			record(spec, false, set_err)
+			wake_waiters()
 			return false, set_err, "skip"
 		end
 		states[spec.name] = "done"
@@ -442,6 +436,7 @@ function M.install(specs, lock, opts)
 		if opts.on_progress then
 			opts.on_progress(spec, build_ok and "done" or "build_error", err)
 		end
+		wake_waiters()
 		return build_ok, err, "skip"
 	end
 
@@ -472,10 +467,10 @@ function M.install(specs, lock, opts)
 				end
 				return
 			end
-		-- unrecorded result (e.g. timed out): record it here
-		if not recorded[spec.name] then
-			record(spec, ok, err)
-		end
+			-- unrecorded result (e.g. timed out): record it here
+			if not recorded[spec.name] then
+				record(spec, ok, err)
+			end
 			if not ok and opts.on_progress then
 				opts.on_progress(spec, "error", err)
 			end

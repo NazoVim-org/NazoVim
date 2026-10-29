@@ -365,8 +365,7 @@ local handlers = {
 function M.dispatch(args)
 	local command = args[1]
 	if not command then
-		require("nazoplug.ui").browse(state)
-		return
+		return require("nazoplug.ui").browse(state)
 	end
 	local handler = handlers[command]
 	if not handler then
