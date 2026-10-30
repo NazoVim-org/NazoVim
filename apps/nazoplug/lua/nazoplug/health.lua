@@ -1,7 +1,5 @@
 local U = require("nazoplug.util")
 local L = require("nazoplug.lock")
-local G = require("nazoplug.git")
-local S = require("nazoplug.spec_state")
 
 local M = {}
 
@@ -20,6 +18,8 @@ function M.setup(opts)
 end
 
 function M.check()
+	local G = require("nazoplug.git")
+	local S = require("nazoplug.spec_state")
 	local health = h()
 	health.start("nazoplug")
 
