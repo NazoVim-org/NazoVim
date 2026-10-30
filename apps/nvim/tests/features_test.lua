@@ -1,0 +1,38 @@
+vim.opt.rtp:prepend("apps/nvim")
+require("nazovim.features").setup()
+assert(vim.fn.exists(":ToggleTerm") == 2)
+assert(vim.fn.maparg("<Plug>(jumpcursor-jump)", "n") ~= "")
+
+-- Hiding a terminal must preserve its buffer and process.
+vim.cmd("ToggleTerm")
+local terminal = vim.api.nvim_get_current_buf()
+assert(vim.bo[terminal].buftype == "terminal")
+local job = vim.b[terminal].terminal_job_id
+vim.cmd("ToggleTerm")
+assert(vim.api.nvim_buf_is_valid(terminal))
+vim.cmd("ToggleTerm")
+assert(vim.api.nvim_get_current_buf() == terminal)
+assert(vim.b[terminal].terminal_job_id == job)
+vim.cmd("ToggleTerm")
+
+-- Filename overlays should not create an endless WinClosed redraw loop.
+vim.cmd("edit feature-test.txt")
+require("nazovim.filename").setup()
+vim.wait(200)
+assert(#vim.api.nvim_tabpage_list_wins(0) == 2)
+vim.cmd("vsplit")
+vim.wait(200)
+assert(#vim.api.nvim_tabpage_list_wins(0) == 4)
+
+require("nazovim.modes").setup()
+assert(vim.api.nvim_get_hl(0, { name = "CursorLineNr" }).fg ~= nil)
+vim.api.nvim_buf_set_lines(0, 0, -1, false, { "abc", "def", "ghi" })
+vim.api.nvim_win_set_cursor(0, { 1, 0 })
+vim.fn.feedkeys(vim.api.nvim_replace_termcodes("<Plug>(jumpcursor-jump)aa", true, false, true), "xt")
+assert(vim.deep_equal(vim.api.nvim_win_get_cursor(0), { 1, 0 }))
+vim.fn.feedkeys(vim.api.nvim_replace_termcodes(":3<Esc>", true, false, true), "xt")
+assert(vim.api.nvim_win_get_cursor(0)[1] == 1)
+vim.fn.feedkeys(vim.api.nvim_replace_termcodes(":3<CR>", true, false, true), "xt")
+assert(vim.api.nvim_win_get_cursor(0)[1] == 3)
+print("features: terminal, filename overlays, mode colors, and commands passed")
+vim.cmd("qall!")

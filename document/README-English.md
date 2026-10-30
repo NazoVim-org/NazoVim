@@ -188,9 +188,9 @@ run `:NazoPlug migrate` to reuse its data directory.
 | noice.nvim | Command line UI / notifications |
 | nvim-notify | Notification system |
 | nvim-scrollbar / satellite.nvim | Scrollbar |
-| modes.nvim | Mode-based cursor color change |
+| Built into NazoVim | Mode-based line number colors |
 | nvim-illuminate | Highlight symbol under cursor |
-| incline.nvim | Floating filename |
+| Built into NazoVim | Floating filename |
 | todo-comments.nvim | Highlight TODO/FIXME and similar |
 | render-markdown.nvim | Rich Markdown rendering |
 | nvim-highlight-colors | Inline color code preview |
@@ -217,7 +217,7 @@ run `:NazoPlug migrate` to reuse its data directory.
 | substitute.nvim | Register-based substitution |
 | dial.nvim | Extended `<C-a>/<C-x>` increment |
 | which-key.nvim | Keymap help |
-| toggleterm.nvim | Floating terminal |
+| Built into NazoVim | Floating terminal (`:ToggleTerm`) |
 | kulala.nvim | REST client (.http files) |
 | persistence.nvim | Session management |
 
