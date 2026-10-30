@@ -1,8 +1,7 @@
 local U = require("nazoplug.util")
 local L = require("nazoplug.lock")
-local G = require("nazoplug.git")
-local I = require("nazoplug.install")
-local S = require("nazoplug.spec_state")
+-- Management operations are not needed until a command is invoked.
+local G, I, S
 
 local M = {}
 
@@ -363,6 +362,9 @@ local handlers = {
 }
 
 function M.dispatch(args)
+	G = G or require("nazoplug.git")
+	I = I or require("nazoplug.install")
+	S = S or require("nazoplug.spec_state")
 	local command = args[1]
 	if not command then
 		return require("nazoplug.ui").browse(state)
