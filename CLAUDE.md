@@ -118,9 +118,9 @@ done
 | noice.nvim | コマンドラインUI / 通知 |
 | nvim-notify | 通知システム |
 | nvim-scrollbar / satellite.nvim | スクロールバー |
-| modes.nvim | モード別カーソル色変化 |
+| NazoVim 内蔵 | モード別の行番号色 |
 | nvim-illuminate | カーソル下シンボルのハイライト |
-| incline.nvim | フローティングファイル名 |
+| NazoVim 内蔵 | フローティングファイル名 |
 | todo-comments.nvim | TODO/FIXME等のハイライト |
 | render-markdown.nvim | Markdownのリッチレンダリング |
 | nvim-highlight-colors | カラーコードのインラインプレビュー |
@@ -147,7 +147,7 @@ done
 | substitute.nvim | レジスタを使った置換 |
 | dial.nvim | `<C-a>/<C-x>` の拡張インクリメント |
 | which-key.nvim | キーマップヘルプ |
-| toggleterm.nvim | フローティングターミナル |
+| NazoVim 内蔵 | フローティングターミナル |
 | kulala.nvim | REST client (.http ファイル) |
 | persistence.nvim | セッション管理 |
 
