@@ -15,7 +15,12 @@ end, { desc = "Code Action (preview)" })
 
 -- Snacks.nvim (Picker / Zen)
 map("n", "<leader><leader>", function()
-	require("snacks.picker").files()
+	local ok, picker = pcall(require, "snacks.picker")
+	if ok then
+		picker.files()
+	else
+		require("config.quickstart").open_file()
+	end
 end, { desc = "Files" })
 
 map("n", "<leader>/", function()

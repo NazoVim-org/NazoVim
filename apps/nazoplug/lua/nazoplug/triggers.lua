@@ -251,7 +251,7 @@ local function setup_keys(spec)
 	end
 end
 
-local function schedule_very_lazy()
+local function schedule_very_lazy(delay, generation)
 	if M.very_lazy_scheduled then
 		return
 	end
@@ -260,13 +260,18 @@ local function schedule_very_lazy()
 		if vim.v.exiting ~= vim.NIL then
 			return
 		end
-		vim.schedule(function()
-			if vim.v.exiting ~= vim.NIL then
+		local function emit()
+			if vim.v.exiting ~= vim.NIL or generation ~= M.generation then
 				return
 			end
 			vim.g.did_very_lazy = true
 			vim.api.nvim_exec_autocmds("User", { pattern = "VeryLazy", modeline = false })
-		end)
+		end
+		if delay > 0 then
+			vim.defer_fn(emit, delay)
+		else
+			vim.schedule(emit)
+		end
 	end
 	vim.api.nvim_create_autocmd("User", {
 		group = M.group,
@@ -319,6 +324,7 @@ function M.setup(specs, opts)
 	M.active = {}
 	M.created = {}
 	M.loading = {}
+	M.generation = (M.generation or 0) + 1
 	M.very_lazy_scheduled = false
 	for _, spec in ipairs(specs) do
 		if S.is_enabled(spec) then
@@ -330,7 +336,12 @@ function M.setup(specs, opts)
 			setup_keys(spec)
 		end
 	end
-	schedule_very_lazy()
+	local delay = type(opts.startup) == "table" and opts.startup.very_lazy_delay_ms or 0
+	if type(delay) ~= "number" or delay < 0 or delay ~= math.floor(delay) or delay > 2147483647 then
+		U.warn("startup.very_lazy_delay_ms must be a non-negative integer")
+		delay = 0
+	end
+	schedule_very_lazy(delay, M.generation)
 end
 
 function M.fire(id)

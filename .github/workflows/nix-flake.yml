@@ -44,6 +44,9 @@ jobs:
         run: |
           nix build .#default --print-build-logs
 
+      - name: Test temporary session
+        run: bash apps/nvim/tests/nix_temporary_test.sh "$PWD/result/bin/nvim"
+
       - name: Build config package
         run: |
           nix build .#config --print-build-logs

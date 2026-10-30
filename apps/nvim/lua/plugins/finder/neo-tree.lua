@@ -2,6 +2,10 @@ return {
 	"nvim-neo-tree/neo-tree.nvim",
 	event = "VeryLazy",
 	cmd = "Neotree",
+	keys = {
+		{ "<leader>n", "<cmd>Neotree filesystem reveal right<cr>", desc = "NeoTree filesystem" },
+		{ "<leader>bf", "<cmd>Neotree buffers reveal float<cr>", desc = "NeoTree buffers" },
+	},
 	branch = "v3.x",
 	dependencies = {
 		"nvim-lua/plenary.nvim",

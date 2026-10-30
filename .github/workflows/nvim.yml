@@ -65,6 +65,12 @@ jobs:
             nvim --headless "+lua if not require([[nazoplug.commands]]).dispatch({[[check]]}) then vim.cmd([[cquit 1]]) end" +q
           '
 
+      - name: Test first-run quickstart
+        run: nix develop --command nvim --headless -u NONE -l apps/nvim/tests/quickstart_test.lua
+
+      - name: Test configurable startup timing
+        run: nix develop --command nvim --headless -u apps/nazoplug/tests/minimal_init.lua -l apps/nazoplug/tests/startup_test.lua
+
       - name: Check Neovim startup (no errors)
         env:
           NPM_CONFIG_PREFIX: /tmp/npm-global

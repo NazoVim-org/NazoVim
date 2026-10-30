@@ -42,6 +42,7 @@ end
 
 local initialized = nazoplug.setup({
 	spec = "plugins",
+	startup = require("config.startup"),
 	defaults = {
 		lazy = true,
 	},
@@ -53,3 +54,5 @@ local initialized = nazoplug.setup({
 if not initialized then
 	error("nazoplug setup failed")
 end
+
+require("config.quickstart").setup(nazoplug)
