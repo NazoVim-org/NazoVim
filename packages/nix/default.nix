@@ -42,6 +42,17 @@ let
       pkgs.ruby
     ];
     text = ''
+      # An explicit ephemeral session keeps all NazoVim state in a private directory.
+      TEMP_ROOT=""
+      if [ "''${1:-}" = "--temporary" ]; then
+        shift
+        TEMP_ROOT="$(mktemp -d "''${TMPDIR:-/tmp}/nazovim.XXXXXXXX")"
+        trap 'rm -rf -- "$TEMP_ROOT"' EXIT
+        export XDG_CONFIG_HOME="$TEMP_ROOT/config"
+        export XDG_DATA_HOME="$TEMP_ROOT/data"
+        export XDG_CACHE_HOME="$TEMP_ROOT/cache"
+        export XDG_STATE_HOME="$TEMP_ROOT/state"
+      fi
       APPNAME="nvim-nazozokc"
       CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
       DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
@@ -68,7 +79,11 @@ let
       if [ ! -f "$DATA_DIR/nazoplug-lock.json" ] && [ -f "$CONFIG_DIR/nazoplug-lock.json" ]; then
         cp "$CONFIG_DIR/nazoplug-lock.json" "$DATA_DIR/nazoplug-lock.json"
       fi
-      exec nvim "$@"
+      if [ -n "$TEMP_ROOT" ]; then
+        nvim "$@"
+      else
+        exec nvim "$@"
+      fi
     '';
   };
 in

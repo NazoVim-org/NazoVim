@@ -56,7 +56,7 @@
 
 | 必須 | バージョン |
 | ---- | ---------- |
-| Neovim | 0.10+ |
+| Neovim | 0.10+（`nix run` では Nix が用意） |
 | Git | any |
 | [Nerd Font](https://www.nerdfonts.com/) | アイコン表示に必要 |
 
@@ -82,6 +82,56 @@ nix run github:NazoVim-org/NazoVim
 <!-- markdownlint-disable MD013 -->
 設定は `~/.config/nvim-nazozokc` に隔離して展開されるため、既存のNeovim設定を汚しません。
 <!-- markdownlint-enable MD013 -->
+
+最初の起動ではプラグインは自動ダウンロードされません。プラグインがない場合は
+組み込みの案内画面から `o` でファイルを開き、`i` で編集、`Esc` の後に
+`:w` で保存、`:q` で終了できます。追加機能が必要なら `p` または
+`:NazoPlug install` でプラグインを導入し、再起動してください。
+プラグインの取得にはネットワークと時間が必要です。
+
+セッションの設定・プラグイン・キャッシュを終了時に破棄するには:
+
+```bash
+nix run github:NazoVim-org/NazoVim -- --temporary
+```
+
+一時セッションでは導入したプラグインも終了時に削除されます。編集したファイルは
+保存先に残ります。通常の起動ではデータとキャッシュを再利用します。
+Nix と flakes が必要で、初回は Nix 自体のダウンロードやビルドに時間がかかります。
+
+### 起動タイミングの設定
+
+`NAZOVIM_STARTUP_CONFIG` に Lua ファイルのパスを指定すると、プラグインごとの
+読み込みタイミングを変更できます。例えば `startup.lua` に次を書きます。
+
+```lua
+return {
+  very_lazy_delay_ms = 200,
+  plugins = {
+    ["kanagawa.nvim"] = "startup",
+    ["nvim-autopairs"] = "InsertEnter",
+    ["lualine.nvim"] = "VeryLazy",
+  },
+}
+```
+
+```bash
+NAZOVIM_STARTUP_CONFIG="$HOME/startup.lua" nix run github:NazoVim-org/NazoVim
+```
+
+タイミングは `startup`、`on_demand`、`VeryLazy`、`InsertEnter` などの Neovim イベント、
+または `User MyEvent` の形式です。`VeryLazy` は UI 表示後に実行され、
+`very_lazy_delay_ms` で待ち時間をミリ秒単位で設定できます。指定がない場合は
+100ms です。`NAZOVIM_VERY_LAZY_DELAY_MS=200` でも指定でき、
+こちらが Lua ファイルの値より優先されます。
+
+既定では `dial.nvim` と `neo-tree.nvim` は `on_demand` で、キーやコマンドで
+必要になったときに読み込みます。`plugins` を指定すると既定の一覧を置き換えます。
+
+コマンド・キー・ファイルタイプによる読み込みは残るため、指定イベントより早く
+使われた場合はその時点で読み込まれます。他のプラグインが依存する場合も先に
+読み込まれることがあります。`init` 関数は引き続き起動時に実行されます。
+遅延はプラグインを使える時刻を遅らせるため、設定前後の体感を測って選んでください。
 
 ### 方法2: Clone（Nix 不要）
 

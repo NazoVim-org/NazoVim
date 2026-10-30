@@ -190,6 +190,32 @@ test("keys trigger executes rhs after loading", function()
 	vim.opt.rtp:remove(spec.dir)
 end)
 
+test("on-demand timing loads a plugin when its key is pressed", function()
+	vim.g.loader_test_ondemand = false
+	local original = plugin_spec("ondemand.nvim")
+	original.event = { "VeryLazy" }
+	original.keys = { {
+		"<F8>",
+		function()
+			vim.g.loader_test_ondemand = true
+		end,
+	} }
+	local specs, by_name = require("nazoplug.boot").apply_startup({ original }, { [original.name] = original }, {
+		plugins = { [original.name] = "on_demand" },
+	})
+	L.setup({ pack_dir = pack_dir, by_name = by_name })
+	T.setup(specs, { loader = L })
+	T.fire("VeryLazy")
+	eq(specs[1]._.loaded, false)
+	local key = vim.api.nvim_replace_termcodes("<F8>", true, false, true)
+	vim.api.nvim_feedkeys(key, "x", false)
+	truthy(vim.wait(100, function()
+		return vim.g.loader_test_ondemand
+	end, 10))
+	truthy(specs[1]._.loaded)
+	vim.opt.rtp:remove(original.dir)
+end)
+
 test("VeryLazy event fires after LazyDone", function()
 	local spec = plugin_spec("verylazy.nvim")
 	spec.event = { "VeryLazy" }

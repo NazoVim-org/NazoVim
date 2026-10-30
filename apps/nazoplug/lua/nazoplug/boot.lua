@@ -8,6 +8,52 @@ local SC = require("nazoplug.spec_cache")
 
 local M = {}
 
+-- Apply user overrides to copies: the spec cache must contain original specs,
+-- not settings from a previous launch.
+function M.apply_startup(specs, by_name, startup)
+	local overrides = type(startup) == "table" and startup.plugins or {}
+	if type(overrides) ~= "table" then
+		U.warn("startup.plugins must be a table")
+		return specs, by_name
+	end
+	local result, map = {}, {}
+	for _, spec in ipairs(specs) do
+		local timing = overrides[spec.name]
+		local copy = spec
+		if timing ~= nil then
+			local event = type(timing) == "string" and timing:match("^(%w+)") or nil
+			local valid = timing == "startup"
+				or timing == "on_demand"
+				or (event and vim.fn.exists("##" .. event) == 1 and (timing == event or timing:match("^%w+%s+%S.*$")))
+			if valid then
+				copy = vim.tbl_extend("force", {}, spec)
+				copy._ = vim.tbl_extend("force", {}, spec._)
+				copy.lazy = timing ~= "startup"
+				if timing == "startup" or timing == "on_demand" then
+					copy.event = nil
+				else
+					copy.event = { timing }
+				end
+			elseif timing == "VeryLazy" then
+				copy = vim.tbl_extend("force", {}, spec)
+				copy._ = vim.tbl_extend("force", {}, spec._)
+				copy.lazy = true
+				copy.event = { timing }
+			else
+				U.warn(string.format("invalid startup timing for %s: %s", spec.name, tostring(timing)))
+			end
+		end
+		result[#result + 1] = copy
+		map[copy.name] = copy
+	end
+	for name in pairs(overrides) do
+		if not by_name[name] then
+			U.warn(string.format("unknown plugin in startup.plugins: %s", tostring(name)))
+		end
+	end
+	return result, map
+end
+
 local function manager_root()
 	local source = debug.getinfo(1, "S").source
 	local path = source:sub(1, 1) == "@" and source:sub(2) or source
@@ -112,6 +158,10 @@ end
 -- Run the full startup sequence and return the plugin-manager state table.
 function M.run(opts)
 	opts = opts or {}
+	if opts.startup ~= nil and type(opts.startup) ~= "table" then
+		U.warn("startup must be a table")
+		opts.startup = nil
+	end
 	local data = vim.fn.stdpath("data")
 	local root = manager_root()
 	local pack_dir = opts.pack_dir or U.join(data, "site/pack/nazoplug/opt")
@@ -135,6 +185,7 @@ function M.run(opts)
 		U.error("failed to collect plugin specs: " .. tostring(collect_err))
 		return nil
 	end
+	specs, by_name = M.apply_startup(specs, by_name, opts.startup)
 	M.validate_specs(specs)
 
 	loader.setup({
@@ -142,7 +193,7 @@ function M.run(opts)
 		by_name = by_name,
 		disabled_plugins = disabled,
 	})
-	triggers.setup(specs, { loader = loader })
+	triggers.setup(specs, { loader = loader, startup = opts.startup })
 	loader.startup(specs, {
 		initialized = true,
 		pack_dir = pack_dir,

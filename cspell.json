@@ -39,6 +39,8 @@
     "rebelot",
     "nixpkgs",
     "luacheck",
+    "lockfiles",
+    "cmdparse",
     "keymap",
     "Keymap",
     "Keymaps",
