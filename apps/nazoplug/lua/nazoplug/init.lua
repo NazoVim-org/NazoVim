@@ -51,7 +51,11 @@ function M.install_missing()
 	if not M.specs then
 		return nil, "nazoplug is not initialized"
 	end
-	return require("nazoplug.install").install_missing(M.specs, M.lock, { lock_path = M.lock_path, save = true, by_name = M.by_name })
+	return require("nazoplug.install").install_missing(
+		M.specs,
+		M.lock,
+		{ lock_path = M.lock_path, save = true, by_name = M.by_name }
+	)
 end
 
 function M.check()
