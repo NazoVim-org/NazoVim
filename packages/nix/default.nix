@@ -46,13 +46,22 @@ let
       CONFIG_DIR="''${XDG_CONFIG_HOME:-$HOME/.config}/$APPNAME"
       DATA_DIR="''${XDG_DATA_HOME:-$HOME/.local/share}/$APPNAME"
       export NVIM_APPNAME="$APPNAME"
-      # symlink なら既存チェック不要、存在すれば上書き
+      # Keep the existing link on the common path; never delete user config.
+      mkdir -p "''${XDG_CONFIG_HOME:-$HOME/.config}"
       if [ -L "$CONFIG_DIR" ]; then
-        rm "$CONFIG_DIR"
-      elif [ -d "$CONFIG_DIR" ]; then
-        rm -rf "$CONFIG_DIR"
+        current_target="$(readlink "$CONFIG_DIR")"
+        if [ "$current_target" != "${nvimConfig}" ]; then
+          case "$current_target" in
+            /nix/store/*-nazovim-*) ln -sfn ${nvimConfig} "$CONFIG_DIR" ;;
+            *) echo "NazoVim: refusing to replace config symlink: $CONFIG_DIR" >&2; exit 1 ;;
+          esac
+        fi
+      elif [ -e "$CONFIG_DIR" ]; then
+        echo "NazoVim: refusing to replace existing config: $CONFIG_DIR" >&2
+        exit 1
+      else
+        ln -s ${nvimConfig} "$CONFIG_DIR"
       fi
-      ln -s ${nvimConfig} "$CONFIG_DIR"
       # プラグインのデータディレクトリを事前に作成
       mkdir -p "$DATA_DIR"
       # 初回起動時に Nix store の lockfile を data dir にコピー
