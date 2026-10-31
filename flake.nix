@@ -59,6 +59,7 @@
             packages = with pkgs; [
               (pkgs.wrapNeovim pkgs.neovim-unwrapped { })
               git
+              ripgrep
               bun
               deno
               nodejs_latest

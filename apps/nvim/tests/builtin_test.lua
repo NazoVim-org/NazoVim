@@ -2,6 +2,7 @@ vim.opt.rtp:prepend("apps/nvim")
 vim.g.mapleader = " "
 vim.o.swapfile = false
 local api = vim.api
+assert(vim.fn.executable("rg") == 1, "builtin tests require ripgrep (rg); run with nix develop --command nvim")
 local function marks(name, buf)
 	return api.nvim_buf_get_extmarks(buf or 0, api.nvim_create_namespace(name), 0, -1, { details = true })
 end

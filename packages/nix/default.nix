@@ -37,6 +37,7 @@ let
     runtimeInputs = [
       neovim
       pkgs.git
+      pkgs.ripgrep
       pkgs.gnumake
       pkgs.nodejs_latest
       pkgs.tree-sitter
