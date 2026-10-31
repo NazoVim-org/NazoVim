@@ -17,7 +17,7 @@ return {
 		},
 		messages = {
 			enabled = true,
-			view_search = "virtualtext",
+			view_search = false, -- nazovim.search owns the search count.
 		},
 		popupmenu = {
 			enabled = true,
@@ -32,7 +32,7 @@ return {
 				["vim.lsp.util.stylize_markdown"] = true,
 				["cmp.entry.get_documentation"] = true,
 			},
-			progress = { enabled = true, view = "mini" },
+			progress = { enabled = false }, -- nazovim.progress owns LSP progress.
 			hover = { enabled = true },
 			signature = { enabled = true },
 			message = { enabled = true },

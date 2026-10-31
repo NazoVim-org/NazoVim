@@ -160,8 +160,8 @@ run `:NazoPlug migrate` to reuse its data directory.
 | actions-preview.nvim | Code action preview |
 | conform.nvim | Formatter (stylua / prettier / etc.) |
 | nvim-lint | Additional diagnostics (rubocop, etc.) |
-| fidget.nvim | LSP progress display |
-| tiny-inline-diagnostic.nvim | Inline diagnostics |
+| NazoVim built-in | LSP progress display |
+| NazoVim built-in | Inline diagnostics |
 | lazydev.nvim | Enhanced Lua/Neovim API completion and type checking |
 
 ### Fuzzy Finder / Navigation
@@ -183,17 +183,17 @@ run `:NazoPlug migrate` to reuse its data directory.
 | Plugin | Purpose |
 | ------ | ------ |
 | kanagawa.nvim | Color scheme (dragon + transparent) |
-| lualine.nvim | Status line |
+| NazoVim built-in | Status line |
 | barbar.nvim | Tab bar |
 | noice.nvim | Command line UI / notifications |
 | nvim-notify | Notification system |
-| nvim-scrollbar / satellite.nvim | Scrollbar |
+| NazoVim built-in | Scrollbar |
 | Built into NazoVim | Mode-based line number colors |
-| nvim-illuminate | Highlight symbol under cursor |
+| NazoVim built-in | Highlight symbol under cursor |
 | Built into NazoVim | Floating filename |
-| todo-comments.nvim | Highlight TODO/FIXME and similar |
+| NazoVim built-in | Highlight TODO/FIXME and similar |
 | render-markdown.nvim | Rich Markdown rendering |
-| nvim-highlight-colors | Inline color code preview |
+| NazoVim built-in | Inline color code preview |
 
 ### Git (Plugins)
 

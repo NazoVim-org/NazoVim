@@ -38,6 +38,7 @@ jobs:
           CONFIG_DIR="$HOME/.config/$NVIM_APPNAME"
           mkdir -p "$CONFIG_DIR/lua"
           cp -r apps/nvim/. "$CONFIG_DIR/"
+          cp -r template "$CONFIG_DIR/template"
           cp -r apps/nazoplug/lua/nazoplug "$CONFIG_DIR/lua/"
           chmod -R u+w "$CONFIG_DIR"
           echo "NVIM_APPNAME=$NVIM_APPNAME" >> "$GITHUB_ENV"
@@ -70,6 +71,11 @@ jobs:
 
       - name: Test configurable startup timing
         run: nix develop --command nvim --headless -u apps/nazoplug/tests/minimal_init.lua -l apps/nazoplug/tests/startup_test.lua
+
+      - name: Test built-in editor features
+        run: |
+          nix develop --command nvim --headless -u NONE -l apps/nvim/tests/features_test.lua
+          nix develop --command nvim --headless -u NONE -l apps/nvim/tests/builtin_test.lua
 
       - name: Check Neovim startup (no errors)
         env:

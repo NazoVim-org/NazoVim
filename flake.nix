@@ -32,6 +32,7 @@
             inherit pkgs;
             version = "2.1.0";
             configSrc = ./apps/nvim;
+            templateSrc = ./template;
             nazoplugSrc = ./apps/nazoplug/lua/nazoplug;
           };
 
