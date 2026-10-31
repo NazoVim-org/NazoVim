@@ -32,6 +32,7 @@
             inherit pkgs;
             version = "2.1.0";
             configSrc = ./apps/nvim;
+            templateSrc = ./template;
             nazoplugSrc = ./apps/nazoplug/lua/nazoplug;
           };
 
@@ -58,6 +59,7 @@
             packages = with pkgs; [
               (pkgs.wrapNeovim pkgs.neovim-unwrapped { })
               git
+              ripgrep
               bun
               deno
               nodejs_latest

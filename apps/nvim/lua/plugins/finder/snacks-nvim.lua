@@ -101,7 +101,7 @@ a neovim distribution]],
 		-- Words
 		-- =========================
 		words = {
-			enabled = true,
+			enabled = false, -- References are owned by nazovim.references.
 			debounce = 200,
 			modes = { "n", "v" },
 			highlight = {

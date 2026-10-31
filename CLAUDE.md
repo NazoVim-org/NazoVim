@@ -91,8 +91,8 @@ done
 | actions-preview.nvim | コードアクションプレビュー |
 | conform.nvim | フォーマッター（stylua / prettier等） |
 | nvim-lint | rubocop等の追加診断 |
-| fidget.nvim | LSPプログレス表示 |
-| tiny-inline-diagnostic.nvim | インライン診断 |
+| NazoVim 内蔵 | LSPプログレス表示 |
+| NazoVim 内蔵 | インライン診断 |
 | lazydev.nvim | Lua/Neovim API の補完・型チェック強化 |
 
 ### Fuzzy Finder / ナビゲーション
@@ -113,17 +113,17 @@ done
 | プラグイン | 用途 |
 | ---------- | ---- |
 | kanagawa.nvim | カラースキーム（dragon + 透明背景） |
-| lualine.nvim | ステータスライン |
+| NazoVim 内蔵 | ステータスライン |
 | barbar.nvim | タブバー |
 | noice.nvim | コマンドラインUI / 通知 |
 | nvim-notify | 通知システム |
-| nvim-scrollbar / satellite.nvim | スクロールバー |
+| NazoVim 内蔵 | スクロールバー |
 | NazoVim 内蔵 | モード別の行番号色 |
-| nvim-illuminate | カーソル下シンボルのハイライト |
+| NazoVim 内蔵 | カーソル下シンボルのハイライト |
 | NazoVim 内蔵 | フローティングファイル名 |
-| todo-comments.nvim | TODO/FIXME等のハイライト |
+| NazoVim 内蔵 | TODO/FIXME等のハイライト |
 | render-markdown.nvim | Markdownのリッチレンダリング |
-| nvim-highlight-colors | カラーコードのインラインプレビュー |
+| NazoVim 内蔵 | カラーコードのインラインプレビュー |
 
 ### Git
 

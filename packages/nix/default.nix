@@ -11,6 +11,7 @@
   version,
   configSrc,
   nazoplugSrc,
+  templateSrc,
 }:
 
 let
@@ -23,6 +24,8 @@ let
       mkdir -p $out/lua/nazoplug
       cp -r . $out/
       cp -r ${nazoplugSrc}/. $out/lua/nazoplug/
+      mkdir -p $out/template
+      cp -r ${templateSrc}/. $out/template/
     '';
   };
 
@@ -34,6 +37,7 @@ let
     runtimeInputs = [
       neovim
       pkgs.git
+      pkgs.ripgrep
       pkgs.gnumake
       pkgs.nodejs_latest
       pkgs.tree-sitter
